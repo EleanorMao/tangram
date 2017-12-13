@@ -1,0 +1,184 @@
+body {
+  background: #fafafa;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #eee
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 8px
+}
+
+.header {
+  top: 0;
+  left: 0;
+  right: 0;
+  color: #fff;
+  height: 60px;
+  z-index: 999;
+  font-size: 30px;
+  position: fixed;
+  line-height: 60px;
+  background: #3ca4f7;
+  padding: 0 30px;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, .2);
+}
+
+.header .title {
+  line-height: 60px;
+  font-size: 24px;
+  margin: 0;
+}
+
+.header .title a {
+  display: inline-block;
+  color: #fff;
+}
+
+.content {
+  margin-left: 200px;
+  margin-top: 60px;
+  padding: 20px 50px;
+  min-height: 300px;
+  margin-bottom: 30px
+}
+
+.component {
+  min-height: 10px;
+  position: relative;
+  display: inline-block;
+  border: 1px dashed #ddd;
+  cursor: pointer!important;
+}
+
+.component > * {
+  cursor: pointer!important;
+}
+
+.component.component-focus {
+  background: #ecf7ff;
+  border: 1px solid #3ca4f7;
+  box-shadow: 0 0 5px #3ca4f79e;
+}
+
+.component.component-active {
+  border: 1px solid #3ca4f7;
+  box-shadow: 0 0 5px #3ca4f79e;
+}
+
+.component-name {
+  height: 20px;
+  line-height: 20px;
+  position: absolute;
+  top: -21px;
+  left: -1px;
+  background: rgba(0, 0, 0, .7);
+  color: #fff;
+  padding: 0 5px;
+  border-radius: 2px;
+  z-index: 999;
+}
+
+.config-bar {
+  width: 450px;
+  float: left;
+  padding: 0 10px 0 0;
+}
+
+.config-preview {
+  overflow: hidden;
+}
+
+.config-bar .config-bar-title {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.config-bar .config-bar-current {
+  font-size: 16px;
+  margin: 0 15px;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.config-bar .el-form .el-form-item .el-form-label {
+  min-width: auto;
+}
+
+.el-form {
+  border: 1px dashed #ddd;
+  margin-top: 5px;
+}
+
+.config-bar-components > li {
+  border-bottom: 1px dashed #ddd;
+  position: relative;
+  line-height: 35px;
+  height: 35px;
+}
+
+.config-bar-components > li > button {
+  position: absolute;
+  right: 0;
+}
+
+.config-dom-tree {
+  width: 190px;
+  float: left;
+  padding-top: 10px;
+  display: inline-block;
+}
+
+.el-tree-select {
+  border-top: 1px dotted #ddd;
+}
+
+.config-config-panel {
+  width: 250px;
+  float: left;
+  display: inline-block;
+}
+
+.el-tree-select-leaf {
+  height: 30px;
+  font-size: 15px;
+  line-height: 30px;
+  position: relative;
+  text-transform: lowercase;
+  border-bottom: 1px dotted #ddd;
+}
+
+.el-tree-select-leaf-active {
+  color: #3ca4f7;
+}
+
+.el-tree-select-leaf-focus {
+  background: #ecf7ff;
+  font-weight: 700;
+  font-size: 16px;
+  color: #3ca4f7;
+  text-transform: uppercase;
+}
+
+.el-tree-select-handler {
+  top: 0;
+  right: 10px;
+  height: 30px;
+  position: absolute;
+}
+
+.el-tree-select-handler > i {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 30px;
+  display: inline-block;
+  margin-right: 2px;
+}
