@@ -343,6 +343,45 @@ export default {
         value: 'text'
       }]
     }]
+  },
+  Tag: {
+    displayName: '标签',
+    config: {
+      type: 'default',
+      closeable: false,
+      children: '标签'
+    },
+    props: [{
+      name: 'children',
+      label: '内容',
+      type: 'text'
+    }, {
+      name: 'type',
+      label: '类型',
+      type: 'select',
+      options: [{
+        label: '默认',
+        value: 'default'
+      }, {
+        label: '主题',
+        value: 'primary'
+      }, {
+        label: '成功',
+        value: 'success'
+      }, {
+        label: '危险',
+        value: 'danger'
+      }, {
+        label: '警告',
+        value: 'warning'
+      }]
+    }, {
+      name: 'closeable',
+      label: '显示叉叉',
+      type: 'switch',
+      on: true,
+      off: false
+    }]
   }
 }
 
