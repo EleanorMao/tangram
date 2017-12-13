@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom'
 import * as ASUMI from 'asumi'
 import classnames from 'classnames'
 import Header from './components/header'
+import Panel from './components/panel'
 import TreeSelect from './components/treeSelect'
 import CodePreview from './components/codePreview'
-import componentsData from './constants/data'
+import componentsData, { category } from './constants/data'
 import styleMap from './constants/style'
 
 import 'asumi/style/asumi-default-theme.css'
@@ -21,7 +22,7 @@ const BASE = {
 }
 
 function getMap (item, map) {
-  map[ item.key ] = item
+  map[item.key] = item
   item.children && item.children.forEach(child => {
     getMap(child, map)
   })
@@ -37,47 +38,44 @@ class Index extends Component {
       base: BASE,
       active: '',
       focus: 'root',
-      components: [ 'Input' ],
-      configData: Object.assign({}, componentsData[ 'div' ].config)
+      components: ['Input'],
+      configData: Object.assign({}, componentsData['div'].config)
     }
   }
 
   // 增加組件
   handleAdd (type) {
-    let newKey
+    let model
     let {components, focus} = this.state
-
     let defProps = {}
-    Object.keys(componentsData[ type ].config).forEach(k => {
+    Object.keys(componentsData[type].config).forEach(k => {
       if (~styleMap.indexOf(k)) {
         if (!defProps.style) {
           defProps.style = {}
         }
-        defProps.style[ k ] = componentsData[ type ].config[ k ]
+        defProps.style[k] = componentsData[type].config[k]
       } else {
-        defProps[ k ] = componentsData[ type ].config[ k ]
+        defProps[k] = componentsData[type].config[k]
       }
     })
-
     this.setState(prev => {
-      if (/[A-Z]/.test(type[ 0 ]) && components.indexOf(type) < 0) {
+      if (/[A-Z]/.test(type[0]) && components.indexOf(type) < 0) {
         prev.components.push(type)
       }
-      let children = prev.map[ focus ].children
+      let children = prev.map[focus].children
       let key = focus + '-' + type.toLowerCase() + '-' + children.length
-      newKey = key
-      let model = {
+      model = {
         key: key,
         type: type,
         children: [],
         props: defProps,
         parentKey: focus
       }
+      prev.map[key] = model
       children.push(model)
-      prev.map[ key ] = model
       return prev
     }, () => {
-      this.handleFocus('', newKey, type)
+      this.handleFocus('', model)
     })
   }
 
@@ -90,29 +88,36 @@ class Index extends Component {
         if (!props.style) {
           props.style = {}
         }
-        props.style[ k ] = config[ k ]
+        props.style[k] = config[k]
       } else {
-        props[ k ] = config[ k ]
+        props[k] = config[k]
       }
     })
     this.setState(prev => {
-      prev.map[ key ].props = props
+      prev.map[key].props = props
       return prev
     })
   }
 
   // 修改屬性
-  handleChange (name, value) {
+  handleChange ({name, value, type}) {
     this.setState(prev => {
-      prev.configData[ name ] = value
+      prev.configData[name] = ~styleMap.indexOf(name) && value === '' ? value : type === 'number' ? Number(value) : value
       return prev
-    })
+    }, () => this.handleAddProps(this.state.focus))
   }
 
   // 聚焦到組件
-  handleFocus (e, key, type) {
+  handleFocus (e, {key, props}) {
     if (e) e.stopPropagation()
-    this.setState({focus: key, active: '', configData: Object.assign({}, componentsData[ type ].config)})
+    let configData = Object.assign({}, props)
+    if (configData.style) {
+      Object.keys(configData.style).forEach(k => {
+        configData[k] = configData.style[k]
+      })
+      delete configData.style
+    }
+    this.setState({focus: key, active: '', configData})
   }
 
   // hover到組件
@@ -124,12 +129,12 @@ class Index extends Component {
   // 移除組件
   handleRemove (e, key, parentKey, type) {
     e.stopPropagation()
-    let parentChild = this.state.map[ parentKey ].children
+    let parentChild = this.state.map[parentKey].children
     this.setState(prev => {
       prev.focus = parentKey
       prev.components.splice(prev.components.indexOf(type), 1)
-      delete prev.map[ key ]
-      prev.map[ parentKey ].children = parentChild.filter(child => {
+      delete prev.map[key]
+      prev.map[parentKey].children = parentChild.filter(child => {
         return child.key !== key
       })
       return prev
@@ -139,30 +144,30 @@ class Index extends Component {
   // 上移
   handleMoveUp (e, child) {
     e.stopPropagation()
-    let parent = this.state.map[ child.parentKey ]
+    let parent = this.state.map[child.parentKey]
     let siblings = parent.children
-    if (siblings && siblings.length && siblings[ 0 ].key === child.key) {
+    if (siblings && siblings.length && siblings[0].key === child.key) {
       // 如果没有上级兄弟则与父同级
-      let parentSiblings = this.state.map[ parent.parentKey ].children
+      let parentSiblings = this.state.map[parent.parentKey].children
       let index = parentSiblings.findIndex(c => { return c.key === child.parentKey })
       if (index === -1) return
       this.setState(prev => {
-        let current = prev.map[ child.parentKey ].children.splice(0, 1)[ 0 ]
+        let current = prev.map[child.parentKey].children.splice(0, 1)[0]
         if (current) {
           prev.active = ''
           current.parentKey = parent.parentKey
-          prev.map[ parent.parentKey ].children.splice(index - 1, 0, current)
+          prev.map[parent.parentKey].children.splice(index - 1, 0, current)
         }
         return prev
       })
     } else {
       let index = siblings.findIndex(c => { return c.key === child.key })
       if (index === -1) return
-      let current = siblings.splice(index, 1)[ 0 ]
+      let current = siblings.splice(index, 1)[0]
       if (current) siblings.splice(index - 1, 0, current)
       this.setState(prev => {
         prev.active = ''
-        prev.map[ child.parentKey ].children = siblings
+        prev.map[child.parentKey].children = siblings
         return prev
       })
     }
@@ -170,66 +175,79 @@ class Index extends Component {
 
   handleMoveDown (e, child) {
     e.stopPropagation()
-    let parent = this.state.map[ child.parentKey ]
+    let parent = this.state.map[child.parentKey]
     let siblings = parent.children
     let length = siblings.length
-    if (siblings && length && siblings[ length - 1 ].key === child.key) {
+    if (siblings && length && siblings[length - 1].key === child.key) {
       // 如果没有下级兄弟则与父同级
-      let parentSiblings = this.state.map[ parent.parentKey ].children
+      let parentSiblings = this.state.map[parent.parentKey].children
       let index = parentSiblings.findIndex(c => { return c.key === child.parentKey })
       if (index === -1) return
       this.setState(prev => {
-        let current = prev.map[ child.parentKey ].children.splice(length - 1, 1)[ 0 ]
+        let current = prev.map[child.parentKey].children.splice(length - 1, 1)[0]
         if (current) {
           current.parentKey = parent.parentKey
-          prev.map[ parent.parentKey ].children.splice(index + 1, 0, current)
+          prev.map[parent.parentKey].children.splice(index + 1, 0, current)
         }
         return prev
       })
     } else {
       let index = siblings.findIndex(c => { return c.key === child.key })
       if (index === -1) return
-      let current = siblings.splice(index, 1)[ 0 ]
+      let current = siblings.splice(index, 1)[0]
       if (current) siblings.splice(index + 1, 0, current)
       this.setState(prev => {
-        prev.map[ child.parentKey ].children = siblings
+        prev.map[child.parentKey].children = siblings
         return prev
       })
     }
   }
 
   // 页面预览
-  previewRender ({type, key, props, children}) {
+  previewRender (child) {
     let {focus, active} = this.state
-    let isComp = /[A-Z]/.test(type[ 0 ])
-    let Comp = isComp ? ASUMI[ type ] : type
+    let {type, key, props, children} = child
+    let isComp = /[A-Z]/.test(type[0])
+    let className = classnames({
+      'component': true,
+      'component-focus': focus === key,
+      'component-active': active === key
+    })
+    let displayName = componentsData[type].displayName
+    let Comp = isComp ? type.indexOf('.') > -1 ? ASUMI[type.split('.')[0]][type.split('.')[1]] : ASUMI[type] : type
+    let previewProps = {
+      key,
+      className,
+      onMouseOut: (e) => this.handleActive(e, ''),
+      onMouseOver: focus === key ? null : (e) => this.handleActive(e, key),
+      onClick: (e) => {
+        e.preventDefault()
+        this.handleFocus(e, child)
+      }
+    }
+    let focusLabel = focus === key
+      ? <span className='component-name'
+        style={{minWidth: displayName.length * 13 + 10}}>{displayName}</span> : null
     return (
-      <div
-        key={key}
-        onMouseOut={(e) => this.handleActive(e, '')}
-        onMouseOver={focus === key ? null : (e) => this.handleActive(e, key)}
-        onClick={(e) => this.handleFocus(e, key, type)}
-        className={classnames({
-          'component': true,
-          'component-focus': focus === key,
-          'component-active': active === key
-        })}>
-        {(focus === key) && <p className='component-name'>{type}</p>}
-        {componentsData[ type ].single ? <Comp {...props} />
-          : <Comp {...props}>
-            {props.children}
-            {children.map(child => {
-              return this.previewRender(child)
-            })}
-          </Comp>}
-      </div>
+      componentsData[type].single
+        ? <div style={{display: 'inline-block'}} {...previewProps}>{focusLabel}<Comp {...props} /></div>
+        : <Comp
+          {...props}
+          {...previewProps}
+        >
+          {focusLabel}
+          {props.children}
+          {children.map(child => {
+            return this.previewRender(child)
+          })}
+        </Comp>
     )
   }
 
   render () {
     let {base, map, focus, active, components, configData} = this.state
-    let focusedType = map[ focus ].type
-    let currentConfig = componentsData[ focusedType ]
+    let focusedType = map[focus].type
+    let currentConfig = componentsData[focusedType]
     return (
       <div>
         <Header />
@@ -242,40 +260,53 @@ class Index extends Component {
                 focus={focus}
                 active={active}
                 onActive={(e, key) => this.handleActive(e, key)}
+                onClick={(e, child) => this.handleFocus(e, child)}
                 onMoveUp={(e, child) => this.handleMoveUp(e, child)}
                 onMoveDown={(e, child) => this.handleMoveDown(e, child)}
-                onClick={(e, key, type) => this.handleFocus(e, key, type)}
                 onRemove={(e, key, parentKey, type) => this.handleRemove(e, key, parentKey, type)}
               />
+            </div>
+            <div className='config-config-panel' style={{width: 150}}>
+              <ASUMI.Button type='primary' className='config-bar-title'>组件列表</ASUMI.Button>
+              {Object.keys(category).map(c => {
+                return (
+                  <Panel title={c} key={c}>
+                    <ul className='config-bar-components'>
+                      {category[c].map(comp => {
+                        if (!componentsData[comp]) return
+                        let invalid = componentsData[focusedType].single || (componentsData[focusedType].invalid && ~componentsData[focusedType].invalid.indexOf(comp))
+                        return (
+                          <li key={comp}>{componentsData[comp].displayName}
+                            {invalid
+                              ? <ASUMI.Button type='text' size='small' disabled>不可添加</ASUMI.Button>
+                              : <ASUMI.Button type='text' size='small'
+                                onClick={() => this.handleAdd(comp)}>添加</ASUMI.Button>}
+                          </li>)
+                      })}
+                    </ul>
+                  </Panel>
+                )
+              })}
             </div>
             <div className='config-config-panel'>
               <ASUMI.Button type='success' className='config-bar-title'>
                 当前组件：
-                <span className='config-bar-current'>{focusedType}</span>
+                <span className='config-bar-current'>{componentsData[focusedType].displayName}</span>
               </ASUMI.Button>
               <div className='config-bar-config'>
                 <ASUMI.Form
                   colon
                   colNum={1}
-                  labelWidth={50}
-                  submitText='确定'
+                  title='属性配置'
+                  labelWidth={80}
+                  submitText='保存'
+                  hideSubmitButton
                   data={configData}
                   options={currentConfig.props}
                   submitButtonProps={{size: 'small'}}
-                  onSubmit={() => this.handleAddProps(focus)}
-                  onChange={({name, value}) => this.handleChange(name, value)}
+                  onChange={(e) => this.handleChange(e)}
                 />
               </div>
-              <ASUMI.Button type='primary' className='config-bar-title'>组件列表</ASUMI.Button>
-              <ul className='config-bar-components'>
-                {Object.keys(componentsData).map(comp => {
-                  return (
-                    <li key={comp}>{comp}
-                      {componentsData[ focusedType ].single ? <ASUMI.Button type='text' size='small'>不可添加</ASUMI.Button>
-                        : <ASUMI.Button type='text' size='small' onClick={() => this.handleAdd(comp)}>添加</ASUMI.Button>}
-                    </li>)
-                })}
-              </ul>
             </div>
           </div>
           <div className='config-preview'>

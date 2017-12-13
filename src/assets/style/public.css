@@ -16,6 +16,10 @@ body {
   border-radius: 8px
 }
 
+div {
+  min-height: 10px!important;
+}
+
 .header {
   top: 0;
   left: 0;
@@ -51,21 +55,31 @@ body {
 }
 
 .component {
-  min-height: 10px;
-  position: relative;
-  display: inline-block;
   border: 1px dashed #ddd;
-  cursor: pointer!important;
+  cursor: pointer !important;
 }
 
 .component > * {
-  cursor: pointer!important;
+  cursor: pointer !important;
 }
 
 .component.component-focus {
-  background: #ecf7ff;
+  z-index: 0;
+  position: relative;
   border: 1px solid #3ca4f7;
   box-shadow: 0 0 5px #3ca4f79e;
+}
+
+.component.component-focus:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: .4;
+  z-index: -1;
+  background: #ecf7ff;
 }
 
 .component.component-active {
@@ -84,10 +98,11 @@ body {
   padding: 0 5px;
   border-radius: 2px;
   z-index: 999;
+  font-size: 13px;
 }
 
 .config-bar {
-  width: 450px;
+  width: 600px;
   float: left;
   padding: 0 10px 0 0;
 }
@@ -109,20 +124,23 @@ body {
   text-decoration: underline;
 }
 
-.config-bar .el-form .el-form-item .el-form-label {
-  min-width: auto;
-}
-
-.el-form {
+.config-bar .config-bar-config {
+  padding: 0 8px;
   border: 1px dashed #ddd;
   margin-top: 5px;
 }
 
+.config-bar .el-form .el-form-item .el-form-label {
+  min-width: auto;
+}
+
 .config-bar-components > li {
   border-bottom: 1px dashed #ddd;
+  padding: 0 10px;
   position: relative;
   line-height: 35px;
   height: 35px;
+  background: #f5f5f5;
 }
 
 .config-bar-components > li > button {
@@ -144,7 +162,7 @@ body {
 .config-config-panel {
   width: 250px;
   float: left;
-  display: inline-block;
+  padding-left: 10px;
 }
 
 .el-tree-select-leaf {
@@ -162,10 +180,7 @@ body {
 
 .el-tree-select-leaf-focus {
   background: #ecf7ff;
-  font-weight: 700;
-  font-size: 16px;
   color: #3ca4f7;
-  text-transform: uppercase;
 }
 
 .el-tree-select-handler {
@@ -181,4 +196,41 @@ body {
   line-height: 30px;
   display: inline-block;
   margin-right: 2px;
+}
+
+.el-panel-title {
+  color: #5e5e5e;
+  height: 40px;
+  line-height: 40px;
+  position: relative;
+  font-size: 1.1538rem;
+  padding: 0 10px;
+  border-bottom: 1px dotted #ddd;
+  position: relative;
+}
+
+.el-panel-title:after {
+  top: 1rem;
+  content: "\F107";
+  right: 1.5384rem;
+  font-size: inherit;
+  position: absolute;
+  text-rendering: auto;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+  font: normal normal normal 14px/1 FontAwesome;
+  transition: -webkit-transform 0.3s ease-in;
+  transition: transform 0.3s ease-in;
+  transition: transform 0.3s ease-in, -webkit-transform 0.3s ease-in;
+  -webkit-transition: -webkit-transform 0.3s ease-in;
+}
+
+.el-panel-title.el-panel-open:after {
+  transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+}
+
+.el-btn.el-disabled.el-small.el-text {
+  color: #BDBDBD;
+  background: transparent;
 }

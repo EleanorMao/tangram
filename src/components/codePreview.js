@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import PropType from 'prop-types'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 
@@ -6,11 +6,28 @@ function getJSXStr ({type, props, children}) {
   let propsInItem = []
   let childrenArr = []
   if (props) {
-    propsInItem = Object.keys(props).map(k => {
+    Object.keys(props).forEach(k => {
+      let item = props[k]
       if (k === 'children') {
-        childrenArr.push(props[k])
+        childrenArr.push(item)
       } else {
-        return `${k}={${JSON.stringify(props[k])}}`
+        if (typeof item === 'string') {
+          propsInItem.push(`${k}=${JSON.stringify(item)}`)
+        } else {
+          if (k === 'style') {
+            let style = {}
+            let valid = false
+            Object.keys(item).forEach(s => {
+              if (item[s] != null && item[s] !== '') {
+                valid = true
+                style[s] = item[s]
+              }
+            })
+            if (valid) propsInItem.push(`${k}={${JSON.stringify(style)}}`)
+          } else {
+            propsInItem.push(`${k}={${JSON.stringify(item)}}`)
+          }
+        }
       }
     })
   }
@@ -19,7 +36,7 @@ function getJSXStr ({type, props, children}) {
       return getJSXStr(child)
     }))
   }
-  return `<${type} ${propsInItem.join(' ')}${childrenArr.length ? '>' + childrenArr.join('') + `</${type}>` : '/>'}`
+  return (`<${type}${propsInItem.length ? ' ' : ''}${propsInItem.join(' ')}${childrenArr.length ? `>${childrenArr.join('')}</${type}>` : '/>'}`)
 }
 
 export default class CodePreview extends Component {
