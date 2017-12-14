@@ -54,6 +54,7 @@ const getDefaultStyleOptions = () => {
     icon: 'px'
   }]
 }
+
 export default {
   div: {
     displayName: '区块(div)',
@@ -291,12 +292,16 @@ export default {
     single: true,
     config: {
       name: 'name',
-      type: 'text'
+      type: 'text',
+      placeholder: ''
     },
     props: [{
       name: 'name',
       type: 'text',
       label: 'name'
+    }, {
+      name: 'placeholder',
+      label: '提示暗纹'
     }, {
       name: 'type',
       label: '类型',
@@ -383,14 +388,395 @@ export default {
       on: true,
       off: false
     }]
+  },
+  Loading: {
+    displayName: '加载中',
+    config: {
+      type: 'stretch',
+      fullScreen: true,
+      loading: false,
+      mask: false,
+      title: ''
+    },
+    props: [{
+      name: 'type',
+      label: '类型',
+      type: 'select',
+      options: [{
+        label: 'stretch',
+        value: 'stretch'
+      }, {
+        label: 'chase-dots',
+        value: 'chase-dots'
+      }]
+    }, {
+      name: 'title',
+      label: '文字'
+    }, {
+      name: 'mask',
+      label: '遮罩',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'fullScreen',
+      label: '全屏',
+      type: 'switch',
+      on: true,
+      off: false
+    }]
+  },
+  Table: {
+    displayName: '表格',
+    expect: ['Col'],
+    childrenType: 'Col',
+    config: {
+      data: [],
+      isKey: 'id',
+      isTree: true,
+      hover: true,
+      remote: false,
+      pagination: true,
+      title: '',
+      footer: ''
+    },
+    props: [{
+      name: 'isKey',
+      label: 'key属性'
+    }, {
+      name: 'pagination',
+      label: '分页',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'isTree',
+      label: '下钻',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'title',
+      label: '表头文字'
+    }, {
+      name: 'footer',
+      label: '表尾文字'
+    }]
+  },
+  Col: {
+    displayName: '列',
+    expect: [],
+    config: {
+      dataField: 'id',
+      dataAlign: 'center',
+      dataFixed: 'auto',
+      dataSort: false,
+      children: 'ID'
+    },
+    props: [{
+      name: 'children',
+      label: '列名'
+    }, {
+      name: 'dataField',
+      label: '列属性名'
+    }, {
+      name: 'dataAlign',
+      label: '对齐',
+      type: 'select',
+      options: [{
+        label: '左对齐',
+        value: 'left'
+      }, {
+        label: '右对齐',
+        value: 'right'
+      }, {
+        label: '居中',
+        value: 'center'
+      }]
+    }, {
+      name: 'dataFixed',
+      label: '固定',
+      type: 'select',
+      options: [{
+        label: '左对齐',
+        value: 'left'
+      }, {
+        label: '右对齐',
+        value: 'right'
+      }, {
+        label: '自动',
+        value: 'auto'
+      }]
+    }, {
+      name: 'dataSort',
+      label: '排序',
+      type: 'switch',
+      on: true,
+      off: false
+    }]
+  },
+  Menu: {
+    displayName: '菜单',
+    expect: ['MenuItem', 'SubMenu', 'MenuItemGroup'],
+    config: {
+      width: 220,
+      openAll: false,
+      openIds: []
+    },
+    props: [{
+      label: '宽度',
+      name: 'width',
+      type: 'number',
+      icon: 'px'
+    }, {
+      name: 'openAll',
+      label: '展开全部',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'openIds',
+      label: '展开的目录id',
+      type: 'taginput'
+    }]
+  },
+  SubMenu: {
+    displayName: '子菜单',
+    expect: ['MenuItem', 'SubMenu', 'MenuItemGroup'],
+    config: {
+      id: '1',
+      title: '子菜单',
+      openAll: true,
+      openIds: []
+    },
+    props: [{
+      label: 'ID(必填)',
+      name: 'id'
+    }, {
+      label: '菜单名',
+      name: 'title'
+    }, {
+      name: 'openAll',
+      label: '展开全部',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'openIds',
+      label: '展开的目录id',
+      type: 'taginput'
+    }]
+  },
+  MenuItemGroup: {
+    displayName: '菜单项组',
+    expect: ['MenuItem', 'SubMenu', 'MenuItemGroup'],
+    config: {
+      id: '1',
+      title: '子菜单'
+    },
+    props: [{
+      label: 'ID(必填)',
+      name: 'id'
+    }, {
+      label: '菜单名',
+      name: 'title'
+    }]
+  },
+  MenuItem: {
+    displayName: '菜单项',
+    expect: ['span', 'a'],
+    config: {
+      id: '1'
+    },
+    props: [{
+      label: 'ID(必填)',
+      name: 'id'
+    }]
+  },
+  Select: {
+    displayName: '选择框',
+    expect: ['Option'],
+    config: {
+      name: '',
+      placeholder: '',
+      multiple: false,
+      selectAll: false,
+      searchable: false,
+      closeAfterSelect: false
+    },
+    props: [{
+      name: 'name',
+      label: 'name'
+    }, {
+      name: 'placeholder',
+      label: '提示暗纹'
+    }, {
+      name: 'multiple',
+      label: '多选',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'selectAll',
+      label: '全选按钮',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'searchable',
+      label: '支持搜索',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'closeAfterSelect',
+      label: '选择后关闭下拉框',
+      type: 'switch',
+      on: true,
+      off: false
+    }]
+  },
+  Option: {
+    displayName: '选项',
+    single: true,
+    expect: [],
+    config: {
+      children: '选项',
+      value: ''
+    },
+    props: [{
+      name: 'children',
+      label: '名称'
+    }, {
+      name: 'value',
+      label: '值'
+    }]
+  },
+  NumberInput: {
+    displayName: '数字输入框',
+    single: true,
+    config: {
+      name: 'name',
+      step: 1,
+      min: Number.MIN_SAFE_INTEGER,
+      max: Number.MAX_SAFE_INTEGER,
+      placeholder: ''
+    },
+    props: [{
+      name: 'name',
+      type: 'text',
+      label: 'name'
+    }, {
+      name: 'placeholder',
+      label: '提示暗纹'
+    }, {
+      name: 'step',
+      label: '倍数',
+      type: 'number'
+    }, {
+      name: 'min',
+      label: '最小值',
+      type: 'number'
+    }, {
+      name: 'max',
+      label: '最大值',
+      type: 'number'
+    }]
+  },
+  TagInput: {
+    displayName: '标签输入框',
+    single: true,
+    config: {
+      value: [],
+      name: '',
+      placeholder: '',
+      separator: 'enter'
+    },
+    props: [{
+      name: 'name',
+      type: 'text',
+      label: 'name'
+    }, {
+      name: 'placeholder',
+      label: '提示暗纹'
+    }, {
+      name: 'separator',
+      label: '分割符',
+      type: 'select',
+      options: [{
+        label: '回车',
+        value: 'enter'
+      }, {
+        label: '空格',
+        value: 'space'
+      }]
+    }]
+  },
+  Radio: {
+    displayName: '单选框',
+    single: true,
+    config: {
+      name: '',
+      label: '',
+      type: '',
+      checked: false
+    },
+    props: [{
+      name: 'name',
+      type: 'text',
+      label: 'name'
+    }, {
+      name: 'label',
+      label: '文字'
+    }, {
+      name: 'checked',
+      label: '是否选中',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      name: 'type',
+      label: '类型',
+      type: 'select',
+      options: [{
+        label: '开关',
+        value: 'switch'
+      }, {
+        label: '普通',
+        value: ''
+      }]
+    }]
+  },
+  Checkbox: {
+    displayName: '多选框',
+    single: true,
+    config: {
+      name: '',
+      label: '',
+      checked: false
+    },
+    props: [{
+      name: 'name',
+      type: 'text',
+      label: 'name'
+    }, {
+      name: 'label',
+      label: '文字'
+    }, {
+      name: 'checked',
+      label: '是否选中',
+      type: 'switch',
+      on: true,
+      off: false
+    }]
   }
 }
 
 export const category = {
   '文本/标题': ['div', 'span', 'p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5'],
   '布局': ['div', 'Grid.Row', 'Grid.Col'],
-  '表单': ['Form', 'FormItem', 'Button', 'Input', 'NumberInput', 'TagInput', 'Select', 'Radio', 'Checkbox', 'Upload', 'Datetime', 'Transfer', 'Editor'],
-  '展示': ['Tag', 'Button', 'Table', 'Loading'],
+  '表单': ['Form', 'FormItem', 'Button', 'Input', 'NumberInput', 'TagInput', 'Select', 'Option', 'Radio', 'Checkbox', 'CheckboxGroup', 'Upload', 'Datetime', 'Transfer', 'Editor'],
+  '展示': ['Tag', 'Button', 'Table', 'Col', 'Loading'],
   '消息': ['Message', 'Tooltip', 'Popover'],
   '导航': ['Dropdown', 'Tabs', 'Menu', 'MenuItem', 'SubMenu', 'MenuItemGroup'],
   '弹窗': ['Modal']

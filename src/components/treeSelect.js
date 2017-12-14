@@ -9,18 +9,24 @@ export default class TreeSelect extends Component {
     this.state = {}
   }
 
+  handleAction (e, name, data) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.props[name] && this.props[name](data)
+  }
+
   leafRender (data, level = 0) {
     let output = []
-    let {map, focus, active, onActive, onRemove, onMoveDown, onMoveUp, onClick} = this.props
+    let {map, focus, active} = this.props
     if (data && data.length) {
       data.forEach((child, index) => {
         let focused = focus === child.key
         let actived = active === child.key
         let hasChildren = !!(child.children && child.children.length)
-        let isRoot = child.key === 'root' && !map[ child.parentKey ]
-        let siblings = !isRoot && map[ child.parentKey ].children
-        let showMoveUp = !isRoot && siblings.length && (siblings[ 0 ].key !== child.key || child.parentKey !== 'root')
-        let showMoveDown = !isRoot && siblings.length && siblings[ siblings.length - 1 ].key !== child.key
+        let isRoot = child.key === 'root' && !map[child.parentKey]
+        let siblings = !isRoot && map[child.parentKey].children
+        let showMoveUp = !isRoot && siblings.length && (siblings[0].key !== child.key || child.parentKey !== 'root')
+        let showMoveDown = !isRoot && siblings.length && siblings[siblings.length - 1].key !== child.key
         output.push(
           <div
             key={child.key + '-' + index + '-' + level}
@@ -30,17 +36,18 @@ export default class TreeSelect extends Component {
               'el-tree-select-leaf-active': actived
             })}
             style={{paddingLeft: 13 + (level * 13)}}
-            onMouseLeave={(e) => onActive(e, '')}
-            onMouseOver={focused ? null : (e) => onActive(e, child.key)}
-            onClick={focused ? null : (e) => onClick(e, child)}
+            onMouseLeave={(e) => this.handleAction(e, 'onActive', '')}
+            onClick={focused ? null : (e) => this.handleAction(e, 'onClick', child)}
+            onMouseOver={focused ? null : (e) => this.handleAction(e, 'onActive', child.key)}
           >
-            {hasChildren && <i className='fa fa-caret-down' style={{marginRight: 3}} />}{componentsData[child.type].displayName}{isRoot && '【根节点】'}
+            {hasChildren && <i className='fa fa-caret-down'
+              style={{marginRight: 3}} />}{componentsData[child.type].displayName}{isRoot && '【根节点】'}
             {!isRoot && (actived || focused) &&
             <div className='el-tree-select-handler'>
-              {!!showMoveUp && <i className='fa fa-arrow-up' onClick={(e) => onMoveUp(e, child)} />}
-              {!!showMoveDown && <i className='fa fa-arrow-down' onClick={(e) => onMoveDown(e, child)} />}
+              {!!showMoveUp && <i className='fa fa-arrow-up' onClick={(e) => this.handleAction(e, 'onMoveUp', child)} />}
+              {!!showMoveDown && <i className='fa fa-arrow-down' onClick={(e) => this.handleAction(e, 'onMoveDown', child)} />}
               <i className='fa fa-close component-remove'
-                onClick={(e) => onRemove(e, child.key, child.parentKey, child.type)} />
+                onClick={(e) => this.handleAction(e, 'onRemove', child)} />
             </div>
             }
 
@@ -58,7 +65,7 @@ export default class TreeSelect extends Component {
     let {data} = this.props
     return (
       <div className='el-tree-select'>
-        {this.leafRender([ data ], 0)}
+        {this.leafRender([data], 0)}
       </div>
     )
   }
@@ -68,10 +75,5 @@ TreeSelect.propTypes = {
   map: PropType.object,
   data: PropType.object,
   focus: PropType.string,
-  active: PropType.string,
-  onClick: PropType.func,
-  onMoveUp: PropType.func,
-  onRemove: PropType.func,
-  onActive: PropType.func,
-  onMoveDown: PropType.func
+  active: PropType.any
 }

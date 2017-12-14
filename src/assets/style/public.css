@@ -55,7 +55,6 @@ div {
 }
 
 .component {
-  box-shadow: 0 0 5px #ddd;
   cursor: pointer !important;
 }
 
@@ -233,4 +232,8 @@ div {
 .el-btn.el-disabled.el-small.el-text {
   color: #BDBDBD;
   background: transparent;
+}
+
+.config-live-preview > div:first-child {
+  box-shadow: 0 0 5px #ddd;
 }

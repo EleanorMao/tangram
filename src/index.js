@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import * as ASUMI from 'asumi'
-import classnames from 'classnames'
 import Header from './components/header'
 import Panel from './components/panel'
 import TreeSelect from './components/treeSelect'
 import CodePreview from './components/codePreview'
 import componentsData, { category } from './constants/data'
 import styleMap from './constants/style'
+import CompWrapper from './components/compWrapper'
 
 import 'asumi/style/asumi-default-theme.css'
 import './assets/style/public.css'
@@ -43,6 +43,9 @@ class Index extends Component {
     }
   }
 
+  getKey (focus, type, length) {
+    return focus + '-' + type.toLowerCase() + '-' + length
+  }
   // 增加組件
   handleAdd (type) {
     let model
@@ -63,7 +66,7 @@ class Index extends Component {
         prev.components.push(type)
       }
       let children = prev.map[focus].children
-      let key = focus + '-' + type.toLowerCase() + '-' + children.length
+      let key = this.getKey(focus, type, children.length)
       model = {
         key: key,
         type: type,
@@ -75,7 +78,7 @@ class Index extends Component {
       children.push(model)
       return prev
     }, () => {
-      this.handleFocus('', model)
+      this.handleFocus(model)
     })
   }
 
@@ -108,8 +111,7 @@ class Index extends Component {
   }
 
   // 聚焦到組件
-  handleFocus (e, {key, props}) {
-    if (e) e.stopPropagation()
+  handleFocus ({key, props}) {
     let configData = Object.assign({}, props)
     if (configData.style) {
       Object.keys(configData.style).forEach(k => {
@@ -121,14 +123,12 @@ class Index extends Component {
   }
 
   // hover到組件
-  handleActive (e, key) {
-    if (e) e.stopPropagation()
+  handleActive (key) {
     this.setState({active: key})
   }
 
   // 移除組件
-  handleRemove (e, key, parentKey, type) {
-    e.stopPropagation()
+  handleRemove ({key, parentKey, type}) {
     let parentChild = this.state.map[parentKey].children
     this.setState(prev => {
       prev.focus = parentKey
@@ -142,12 +142,10 @@ class Index extends Component {
   }
 
   // 上移
-  handleMoveUp (e, child) {
-    e.stopPropagation()
+  handleMoveUp (child) {
     let parent = this.state.map[child.parentKey]
     let siblings = parent.children
     if (siblings && siblings.length && siblings[0].key === child.key) {
-      // 如果没有上级兄弟则与父同级
       let parentSiblings = this.state.map[parent.parentKey].children
       let index = parentSiblings.findIndex(c => { return c.key === child.parentKey })
       if (index === -1) return
@@ -173,13 +171,11 @@ class Index extends Component {
     }
   }
 
-  handleMoveDown (e, child) {
-    e.stopPropagation()
+  handleMoveDown (child) {
     let parent = this.state.map[child.parentKey]
     let siblings = parent.children
     let length = siblings.length
     if (siblings && length && siblings[length - 1].key === child.key) {
-      // 如果没有下级兄弟则与父同级
       let parentSiblings = this.state.map[parent.parentKey].children
       let index = parentSiblings.findIndex(c => { return c.key === child.parentKey })
       if (index === -1) return
@@ -207,40 +203,27 @@ class Index extends Component {
   previewRender (child) {
     let {focus, active} = this.state
     let {type, key, props, children} = child
-    let isComp = /[A-Z]/.test(type[0])
-    let className = classnames({
-      'component': true,
-      'component-focus': focus === key,
-      'component-active': active === key
-    })
-    let displayName = componentsData[type].displayName
-    let Comp = isComp ? type.indexOf('.') > -1 ? ASUMI[type.split('.')[0]][type.split('.')[1]] : ASUMI[type] : type
     let previewProps = {
-      key,
-      className,
-      onMouseOut: (e) => this.handleActive(e, ''),
-      onMouseOver: focus === key ? null : (e) => this.handleActive(e, key),
-      onClick: (e) => {
-        e.preventDefault()
-        this.handleFocus(e, child)
-      }
+      onClick: () => this.handleFocus(child),
+      onMouseOut: () => this.handleActive(''),
+      onMouseOver: focus === key ? null : () => this.handleActive(key)
     }
-    let focusLabel = focus === key
-      ? <span className='component-name'
-        style={{minWidth: displayName.length * 13 + 10}}>{displayName}</span> : null
+
     return (
-      componentsData[type].single
-        ? <div style={{display: 'inline-block'}} {...previewProps}>{focusLabel}<Comp {...props} /></div>
-        : <Comp
-          {...props}
-          {...previewProps}
-        >
-          {focusLabel}
-          {props.children}
-          {children.map(child => {
-            return this.previewRender(child)
-          })}
-        </Comp>
+      <CompWrapper
+        key={key}
+        __id={key}
+        __type={type}
+        __focus={focus}
+        __active={active}
+        {...props}
+        {...previewProps}
+      >
+        {props.children}
+        {children.map(child => {
+          return this.previewRender(child)
+        })}
+      </CompWrapper>
     )
   }
 
@@ -259,11 +242,11 @@ class Index extends Component {
                 data={base}
                 focus={focus}
                 active={active}
-                onActive={(e, key) => this.handleActive(e, key)}
-                onClick={(e, child) => this.handleFocus(e, child)}
-                onMoveUp={(e, child) => this.handleMoveUp(e, child)}
-                onMoveDown={(e, child) => this.handleMoveDown(e, child)}
-                onRemove={(e, key, parentKey, type) => this.handleRemove(e, key, parentKey, type)}
+                onActive={(key) => this.handleActive(key)}
+                onClick={(child) => this.handleFocus(child)}
+                onRemove={(child) => this.handleRemove(child)}
+                onMoveUp={(child) => this.handleMoveUp(child)}
+                onMoveDown={(child) => this.handleMoveDown(child)}
               />
             </div>
             <div className='config-config-panel' style={{width: 150}}>
@@ -274,7 +257,9 @@ class Index extends Component {
                     <ul className='config-bar-components'>
                       {category[c].map(comp => {
                         if (!componentsData[comp]) return
-                        let invalid = componentsData[focusedType].single || (componentsData[focusedType].invalid && ~componentsData[focusedType].invalid.indexOf(comp)) || (componentsData[focusedType].expect && !~componentsData[focusedType].expect.indexOf(comp))
+                        let invalid = componentsData[focusedType].single ||
+                          (componentsData[focusedType].invalid && ~componentsData[focusedType].invalid.indexOf(comp)) ||
+                          (componentsData[focusedType].expect && !~componentsData[focusedType].expect.indexOf(comp))
                         return (
                           <li key={comp}>{componentsData[comp].displayName}
                             {invalid
@@ -311,7 +296,7 @@ class Index extends Component {
           </div>
           <div className='config-preview'>
             <h2>页面预览</h2>
-            <div>{this.previewRender(base)}</div>
+            <div className='config-live-preview'>{this.previewRender(base)}</div>
             <h2>代码预览</h2>
             <CodePreview data={base} components={components} />
           </div>

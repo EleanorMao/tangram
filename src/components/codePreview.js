@@ -36,7 +36,9 @@ function getJSXStr ({type, props, children}) {
       return getJSXStr(child)
     }))
   }
-  return (`<${type}${propsInItem.length ? ' ' : ''}${propsInItem.join(' ')}${childrenArr.length ? `>${childrenArr.join('')}</${type}>` : '/>'}`)
+  return (`<${type}${propsInItem.length ? ' ' : ''}${propsInItem.join(' ')}${childrenArr.length ? `>
+  ${childrenArr.join('')}
+</${type}>` : ' />'}`)
 }
 
 export default class CodePreview extends Component {
@@ -44,26 +46,26 @@ export default class CodePreview extends Component {
     let {data, components} = this.props
     let code = [data].map(item => {
       return getJSXStr(item)
-    })
+    })[0]
     return (
-      <SyntaxHighlighter language='javascript'>
+      <SyntaxHighlighter>
         {`
-                import React, { Component } from 'react'
-                import ReactDOM from 'react-dom'${components.length ? `
-                import {${components.join(', ')}} from 'asumi'` : ''}
+  import React, { Component } from 'react'
+  import ReactDOM from 'react-dom'${components.length ? `
+  import {${components.join(', ')}} from 'asumi'` : ''}
 
-                export default Class Main extends Component {
-                  constructor () {
-                    super()
-                    this.state = {}
-                  }
+  export default Class Main extends Component {
+    constructor () {
+      super()
+      this.state = {}
+    }
 
-                  render () {
-                    return (
-                      ${code.join('')}
-                    )
-                  }
-                }
+    render () {
+      return (
+        ${code}
+    )
+  }
+}
               `}
       </SyntaxHighlighter>
     )
