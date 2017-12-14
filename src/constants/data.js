@@ -74,6 +74,7 @@ export default {
   },
   span: {
     displayName: '行内文本(span)',
+    invalid: ['p'],
     config: Object.assign({
       children: '文字',
       fontSize: '',
@@ -96,7 +97,7 @@ export default {
   },
   p: {
     displayName: '段落(p)',
-    invalid: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'div'],
+    expect: ['span', 'a'],
     config: Object.assign({
       children: '段落',
       fontSize: '',

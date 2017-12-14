@@ -274,7 +274,7 @@ class Index extends Component {
                     <ul className='config-bar-components'>
                       {category[c].map(comp => {
                         if (!componentsData[comp]) return
-                        let invalid = componentsData[focusedType].single || (componentsData[focusedType].invalid && ~componentsData[focusedType].invalid.indexOf(comp))
+                        let invalid = componentsData[focusedType].single || (componentsData[focusedType].invalid && ~componentsData[focusedType].invalid.indexOf(comp)) || (componentsData[focusedType].expect && !~componentsData[focusedType].expect.indexOf(comp))
                         return (
                           <li key={comp}>{componentsData[comp].displayName}
                             {invalid
