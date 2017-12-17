@@ -769,13 +769,261 @@ export default {
       on: true,
       off: false
     }]
+  },
+  RadioGroup: {
+    displayName: '单选组',
+    single: true,
+    config: {
+      options: [],
+      disableAll: false,
+      name: '',
+      value: ''
+    },
+    props: [{
+      name: 'name',
+      label: 'name'
+    }, {
+      name: 'disableAll',
+      label: '全不可用',
+      type: 'switch',
+      on: true,
+      off: false
+    }],
+    mapableProps: {
+      options: {
+        displayName: '',
+        config: {
+          value: '',
+          label: '',
+          disabled: false
+        },
+        props: [{
+          name: 'value',
+          label: '值',
+          size: 'small'
+        }, {
+          name: 'label',
+          label: '文字',
+          size: 'small'
+        }, {
+          name: 'disabled',
+          label: '可用',
+          type: 'switch',
+          off: true,
+          on: false
+        }]
+      }
+    }
+  },
+  CheckboxGroup: {
+    displayName: '多选组',
+    single: true,
+    config: {
+      options: [],
+      disableAll: false,
+      name: '',
+      value: []
+    },
+    props: [{
+      name: 'name',
+      label: 'name'
+    }, {
+      name: 'disableAll',
+      label: '全不可用',
+      type: 'switch',
+      on: true,
+      off: false
+    }],
+    mapableProps: {
+      options: {
+        displayName: '',
+        config: {
+          value: '',
+          label: '',
+          disabled: false
+        },
+        props: [{
+          name: 'value',
+          label: '值',
+          size: 'small'
+        }, {
+          name: 'label',
+          label: '文字',
+          size: 'small'
+        }, {
+          name: 'disabled',
+          label: '可用',
+          type: 'switch',
+          off: true,
+          on: false
+        }]
+      }
+    }
+  },
+  FormItem: {
+    displayName: '表单项',
+    single: true,
+    config: { // TODO 没写完
+      name: '',
+      tips: '',
+      value: '',
+      label: '',
+      colon: true,
+      type: 'text',
+      validate: [],
+      labelWidth: '',
+      placeholder: '',
+      required: false,
+      validateType: 'error'
+    },
+    props: [{
+      name: 'type',
+      label: '类型',
+      type: 'select',
+      options: [{
+        label: '输入框',
+        value: 'text'
+      }, {
+        label: '文本区域',
+        value: 'textarea'
+      }, {
+        label: '选择框',
+        value: 'select'
+      }, {
+        label: '数字输入框',
+        value: 'number'
+      }]
+    }, {
+      name: 'name',
+      label: 'name'
+    }, {
+      name: 'value',
+      label: 'value'
+    }, {
+      name: 'label',
+      label: '名称'
+    }, {
+      name: 'tips',
+      label: '提示信息'
+    }, {
+      name: 'placeholder',
+      label: '提示暗纹'
+    }],
+    mapableProps: {
+      validate: {
+        displayName: '验证',
+        config: {
+          message: '',
+          trigger: 'submit',
+          minLength: 0,
+          maxLength: 255
+        },
+        props: [{
+          name: 'trigger',
+          type: 'select',
+          size: 'small',
+          label: '触发',
+          options: [{
+            label: '输入时',
+            value: 'change'
+          }, {
+            label: '失焦时',
+            value: 'blur'
+          }, {
+            label: '提交',
+            value: 'submit'
+          }]
+        }, {
+          label: '提示',
+          name: 'message'
+        }, {
+          label: '最小长度',
+          name: 'minLength',
+          type: 'number'
+        }, {
+          label: '最大长度',
+          name: 'maxLength',
+          type: 'number'
+        }]
+      },
+      options: {
+        condition: (props) => {
+          return props.type === 'select'
+        },
+        displayName: '选项',
+        config: {
+          label: '',
+          value: ''
+        },
+        props: [{
+          label: '名称',
+          name: 'label',
+          size: 'small'
+        }, {
+          label: '值',
+          name: 'value',
+          size: 'small'
+        }]
+      }
+    }
+  },
+  Form: {
+    displayName: '表单',
+    config: {
+      data: {},
+      layout: 'horizontal',
+      title: '',
+      colon: true,
+      colNum: '',
+      hideSubmitButton: false,
+      submitText: '提交'
+    },
+    props: [{
+      label: '布局',
+      name: 'layout',
+      type: 'select',
+      options: [{
+        label: '水平',
+        value: 'horizontal'
+      }, {
+        label: '垂直',
+        value: 'vertical'
+      }, {
+        label: '内联',
+        value: 'inline'
+      }]
+    }, {
+      label: '表格标题',
+      name: 'title'
+    }, {
+      label: '显示冒号',
+      name: 'colon',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      label: '每行显示N个表单项',
+      name: 'colNum',
+      type: 'number',
+      min: 0,
+      max: 12
+    }, {
+      label: '隐藏提交按钮',
+      name: 'hideSubmitButton',
+      type: 'switch',
+      on: true,
+      off: false
+    }, {
+      label: '提交按钮',
+      name: 'submitText'
+    }]
   }
 }
 
 export const category = {
   '文本/标题': ['div', 'span', 'p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5'],
   '布局': ['div', 'Grid.Row', 'Grid.Col'],
-  '表单': ['Form', 'FormItem', 'Button', 'Input', 'NumberInput', 'TagInput', 'Select', 'Option', 'Radio', 'Checkbox', 'CheckboxGroup', 'Upload', 'Datetime', 'Transfer', 'Editor'],
+  '表单': ['Form', 'FormItem', 'Button', 'Input', 'NumberInput', 'TagInput', 'Select', 'Option', 'Radio', 'RadioGroup', 'Checkbox', 'CheckboxGroup', 'Upload', 'Datetime', 'Transfer', 'Editor'],
   '展示': ['Tag', 'Button', 'Table', 'Col', 'Loading'],
   '消息': ['Message', 'Tooltip', 'Popover'],
   '导航': ['Dropdown', 'Tabs', 'Menu', 'MenuItem', 'SubMenu', 'MenuItemGroup'],

@@ -6,6 +6,7 @@ import Panel from './components/panel'
 import TreeSelect from './components/treeSelect'
 import CodePreview from './components/codePreview'
 import componentsData, { category } from './constants/data'
+import actionsData, { actionTypes, events } from './constants/actions'
 import styleMap from './constants/style'
 import CompWrapper from './components/compWrapper'
 
@@ -18,7 +19,9 @@ const BASE = {
   props: {
     style: {width: 800}
   },
-  children: []
+  children: [],
+  controls: [],
+  events: {}
 }
 
 function getMap (item, map) {
@@ -28,24 +31,33 @@ function getMap (item, map) {
   })
 }
 
+function getKey (focus, type, length) {
+  return focus + '-' + type.toLowerCase() + '-' + length
+}
+
 class Index extends Component {
   constructor () {
     super()
     const MAP = {}
     getMap(BASE, MAP)
+    this.funcNames = {}
+    this.controlNames = {}
     this.state = {
       map: MAP,
       base: BASE,
       active: '',
+      stateMap: {},
       focus: 'root',
+      visible: false,
       components: ['Input'],
-      configData: Object.assign({}, componentsData['div'].config)
+      configData: Object.assign({}, componentsData['div'].config),
+      eventName: '',
+      actionType: '',
+      functionName: '',
+      actionConfig: {}
     }
   }
 
-  getKey (focus, type, length) {
-    return focus + '-' + type.toLowerCase() + '-' + length
-  }
   // 增加組件
   handleAdd (type) {
     let model
@@ -66,11 +78,13 @@ class Index extends Component {
         prev.components.push(type)
       }
       let children = prev.map[focus].children
-      let key = this.getKey(focus, type, children.length)
+      let key = getKey(focus, type, children.length)
       model = {
         key: key,
         type: type,
+        events: {},
         children: [],
+        controls: [],
         props: defProps,
         parentKey: focus
       }
@@ -102,12 +116,140 @@ class Index extends Component {
     })
   }
 
+  handleAddEvent (eventName) {
+    this.setState(prev => {
+      prev.eventName = eventName
+      prev.visible = true
+      return prev
+    })
+  }
+
+  handleClose () {
+    this.setState({visible: false, eventName: ''})
+  }
+
+  // 选择组件
+  handleChooseComp ({key}) {
+    this.setState(prev => {
+      prev.actionConfig.actionComp = key
+      return prev
+    })
+  }
+
+  // 选择动作
+  handleChoseAction (actionType) {
+    let f = actionsData[actionType].functionName
+    let c = actionsData[actionType].config.controlName
+    if (this.funcNames[f]) {
+      f = f + (this.funcNames[f].length ? Math.max.apply(null, this.funcNames[f]) + 1 : 1)
+    }
+    if (c && this.controlNames[c]) {
+      c = c + (this.controlNames[c].length ? Math.max.apply(null, this.controlNames[c]) + 1 : 1)
+    }
+    this.setState(prev => {
+      prev.functionName = f
+      prev.actionType = actionType
+      prev.actionConfig = Object.assign({}, actionsData[actionType].config)
+      if (actionsData[actionType].choseComp) {
+        prev.actionConfig.actionComp = prev.focus
+      }
+      if (actionsData[actionType].config.controlName) {
+        prev.actionConfig.controlName = c
+      }
+      return prev
+    })
+  }
+
+  handleChangeF ({value}) {
+    this.setState(prev => {
+      prev.functionName = value
+      return prev
+    })
+  }
+
+  // 修改事件属性
+  handleChangeAction ({name, value}) {
+    this.setState(prev => {
+      prev.actionConfig[name] = value
+      return prev
+    })
+  }
+
+  // 添加事件属性
+  handleSaveAction () {
+    let {actionConfig, actionType, eventName, functionName, focus} = this.state
+    let fNum = functionName.match(/\d*$/)[0]
+    let f = fNum ? functionName.replace(/\d*$/, '') : functionName
+    if (!this.funcNames[f]) {
+      this.funcNames[f] = []
+    }
+    if (fNum) this.funcNames[f].push(fNum)
+    if (actionConfig.controlName) {
+      let cNum = actionConfig.controlName.match(/\d*$/)[0]
+      let c = cNum ? actionConfig.controlName.replace(/\d*$/, '') : actionConfig.controlName
+      if (!this.controlNames[c]) {
+        this.controlNames[c] = []
+      }
+      if (cNum) this.controlNames[c].push(cNum)
+    }
+    this.setState(prev => {
+      if (!prev.map[focus].events[eventName]) {
+        prev.map[focus].events[eventName] = []
+      }
+      prev.map[focus].events[eventName].push({
+        functionName,
+        actionConfig,
+        actionType
+      })
+      if (actionConfig.controlName) {
+        prev.stateMap[actionConfig.controlName] = actionConfig.defaultControlValue
+      }
+      if (actionConfig.actionComp) {
+        prev.map[actionConfig.actionComp].controls.push(actionConfig.controlName)
+      }
+      prev.actionConfig = {}
+      prev.functionName = ''
+      prev.actionType = ''
+      return prev
+    })
+    this.handleClose()
+  }
+
   // 修改屬性
   handleChange ({name, value, type}) {
     this.setState(prev => {
       prev.configData[name] = ~styleMap.indexOf(name) && value === '' ? value : type === 'number' ? Number(value) : value
       return prev
     }, () => this.handleAddProps(this.state.focus))
+  }
+
+  // 修改需要map的属性
+  handleChangeMapProps ({name, value, type}, propName, index) {
+    this.setState(prev => {
+      prev.configData[propName][index][name] = ~styleMap.indexOf(name) && value === '' ? value : type === 'number' ? Number(value) : value
+      return prev
+    }, () => this.handleAddProps(this.state.focus))
+  }
+
+  // 移除需要map的属性
+  handleRemoveMapProps (e, propName, index) {
+    e.stopPropagation()
+    e.preventDefault()
+    this.setState(prev => {
+      prev.configData[propName].splice(index, 1)
+      return prev
+    }, () => this.handleAddProps(this.state.focus))
+  }
+
+  // 添加需要map的属性
+  handleAddMapProps (propName, config) {
+    this.setState(prev => {
+      if (!prev.configData[propName] || !(prev.configData[propName] instanceof Array)) {
+        prev.configData[propName] = []
+      }
+      prev.configData[propName].push(Object.assign({}, config))
+      return prev
+    })
   }
 
   // 聚焦到組件
@@ -171,6 +313,7 @@ class Index extends Component {
     }
   }
 
+  // 下移
   handleMoveDown (child) {
     let parent = this.state.map[child.parentKey]
     let siblings = parent.children
@@ -227,10 +370,160 @@ class Index extends Component {
     )
   }
 
-  render () {
-    let {base, map, focus, active, components, configData} = this.state
+  // 配置渲染
+  configRender () {
+    let {map, focus, configData} = this.state
     let focusedType = map[focus].type
     let currentConfig = componentsData[focusedType]
+    let mapableProps = currentConfig.mapableProps && Object.keys(currentConfig.mapableProps)
+    return (
+      <div className='config-config-panel'>
+        <ASUMI.Button type='success' className='config-bar-title'>
+          当前组件：
+          <span className='config-bar-current'>{componentsData[focusedType].displayName}</span>
+        </ASUMI.Button>
+        <div className='config-bar-config'>
+          <ASUMI.Form
+            colon
+            colNum={1}
+            title='属性配置'
+            labelWidth={80}
+            hideSubmitButton
+            data={configData}
+            options={currentConfig.props}
+            onChange={(e) => this.handleChange(e)}
+          />
+          {!!mapableProps &&
+          mapableProps.map(propName => {
+            let mapItem = currentConfig.mapableProps[propName]
+            if (mapItem.condition && !mapItem.condition(configData)) return null
+            return (
+              <div key={propName} style={{marginBottom: 10}}>
+                {configData[propName] && configData[propName].map((item, index) => {
+                  return (
+                    <ASUMI.Form
+                      colon
+                      key={index}
+                      data={item}
+                      labelWidth={40}
+                      title={<div className='el-removable-title'>
+                        第{index + 1}项
+                        <i className='fa fa-close' onClick={(e) => this.handleRemoveMapProps(e, propName, index)} />
+                      </div>}
+                      layout='inline'
+                      hideSubmitButton
+                      options={mapItem.props}
+                      className='el-small-form'
+                      onChange={(e) => this.handleChangeMapProps(e, propName, index)}
+                    />
+                  )
+                })}
+                <ASUMI.Button
+                  size='small'
+                  type='primary'
+                  onClick={() => this.handleAddMapProps(propName, mapItem.config)}>
+                  <i className='fa fa-plus' /> 添加{mapItem.displayName || propName}
+                </ASUMI.Button>
+              </div>
+            )
+          })
+          }
+        </div>
+      </div>
+    )
+  }
+
+  // 动作渲染
+  actionRender () {
+    let {map, focus} = this.state
+    let focusedType = map[focus].type
+    return (
+      <div className='config-config-panel' style={{width: 200}}>
+        <ASUMI.Button type='secondary' className='config-bar-title'>添加事件</ASUMI.Button>
+        <div className='config-bar-config'>
+          <ul className='config-bar-components'>
+            {Object.keys(events).map(e => {
+              let invalid = events[e].expect && !~events[e].expect.indexOf(focusedType)
+              return (
+                <li key={e}>{events[e].displayName}
+                  {invalid
+                    ? <ASUMI.Button type='text' size='small' disabled>不可添加</ASUMI.Button>
+                    : <ASUMI.Button
+                      type='text'
+                      size='small'
+                      onClick={() => this.handleAddEvent(e)}>添加</ASUMI.Button>}
+                </li>)
+            })}
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  modalRender () {
+    let {map, base, actionType, visible, actionConfig, functionName} = this.state
+    return (
+      <ASUMI.Modal visible={visible} title='编辑事件' footer={null} onClose={() => this.handleClose()}>
+        <ASUMI.Grid.Row>
+          <ASUMI.Grid.Col col={2}>
+            {Object.keys(actionTypes).map(a => {
+              return (
+                <Panel title={a} key={a}>
+                  <ul className='config-bar-components'>
+                    {actionTypes[a].map(aT => {
+                      if (!actionsData[aT]) return null
+                      return (
+                        <li key={aT}>{actionsData[aT].displayName}
+                          <ASUMI.Button
+                            type='text'
+                            size='small'
+                            onClick={() => this.handleChoseAction(aT)}>添加</ASUMI.Button>
+                        </li>)
+                    })}
+                  </ul>
+                </Panel>
+              )
+            })}
+          </ASUMI.Grid.Col>
+          {actionType && actionsData[actionType].choseComp &&
+          <ASUMI.Grid.Col col={4}>
+            <div>请选择联动对象</div>
+            <TreeSelect
+              map={map}
+              data={base}
+              showHandler={false}
+              focus={actionConfig.actionComp}
+              onClick={(child) => this.handleChooseComp(child)}
+            />
+          </ASUMI.Grid.Col>}
+          <ASUMI.Grid.Col col={6}>
+            {!!actionType &&
+            <ASUMI.Form
+              colon
+              labelWidth={100}
+              submitText='保存'
+              data={actionConfig}
+              options={actionsData[actionType].props}
+              onSubmit={() => this.handleSaveAction()}
+              onChange={(e) => this.handleChangeAction(e)}
+              title={`编辑${actionsData[actionType].displayName}`}
+            >
+              <ASUMI.FormItem
+                onChange={(e) => this.handleChangeF(e)}
+                value={functionName}
+                name='functionName'
+                label='方法名'
+              />
+            </ASUMI.Form>}
+          </ASUMI.Grid.Col>
+        </ASUMI.Grid.Row>
+      </ASUMI.Modal>
+    )
+  }
+
+  render () {
+    let {base, map, focus, active, stateMap, components} = this.state
+    let focusedType = map[focus].type
     return (
       <div>
         <Header />
@@ -273,34 +566,17 @@ class Index extends Component {
                 )
               })}
             </div>
-            <div className='config-config-panel'>
-              <ASUMI.Button type='success' className='config-bar-title'>
-                当前组件：
-                <span className='config-bar-current'>{componentsData[focusedType].displayName}</span>
-              </ASUMI.Button>
-              <div className='config-bar-config'>
-                <ASUMI.Form
-                  colon
-                  colNum={1}
-                  title='属性配置'
-                  labelWidth={80}
-                  submitText='保存'
-                  hideSubmitButton
-                  data={configData}
-                  options={currentConfig.props}
-                  submitButtonProps={{size: 'small'}}
-                  onChange={(e) => this.handleChange(e)}
-                />
-              </div>
-            </div>
+            {this.configRender()}
+            {this.actionRender()}
           </div>
           <div className='config-preview'>
             <h2>页面预览</h2>
             <div className='config-live-preview'>{this.previewRender(base)}</div>
             <h2>代码预览</h2>
-            <CodePreview data={base} components={components} />
+            <CodePreview data={base} map={map} components={components} stateMap={stateMap} />
           </div>
         </section>
+        {this.modalRender()}
       </div>
     )
   }

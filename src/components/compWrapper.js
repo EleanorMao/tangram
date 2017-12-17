@@ -48,6 +48,7 @@ export default class CompWrapper extends Component {
   }
 
   render () {
+    /* eslint-disable */
     let {__type, __focus, __id, __active, onClick, onMouseOut, onMouseOver, children, ...props} = this.props
     if (!__type) return null
     let isComp = /[A-Z]/.test(__type[0])

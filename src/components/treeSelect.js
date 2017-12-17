@@ -17,7 +17,7 @@ export default class TreeSelect extends Component {
 
   leafRender (data, level = 0) {
     let output = []
-    let {map, focus, active} = this.props
+    let {map, focus, active, showHandler} = this.props
     if (data && data.length) {
       data.forEach((child, index) => {
         let focused = focus === child.key
@@ -42,7 +42,7 @@ export default class TreeSelect extends Component {
           >
             {hasChildren && <i className='fa fa-caret-down'
               style={{marginRight: 3}} />}{componentsData[child.type].displayName}{isRoot && '【根节点】'}
-            {!isRoot && (actived || focused) &&
+            {!isRoot && (actived || focused) && showHandler &&
             <div className='el-tree-select-handler'>
               {!!showMoveUp && <i className='fa fa-arrow-up' onClick={(e) => this.handleAction(e, 'onMoveUp', child)} />}
               {!!showMoveDown && <i className='fa fa-arrow-down' onClick={(e) => this.handleAction(e, 'onMoveDown', child)} />}
@@ -71,9 +71,14 @@ export default class TreeSelect extends Component {
   }
 }
 
+TreeSelect.defaultProps = {
+  showHandler: true
+}
+
 TreeSelect.propTypes = {
   map: PropType.object,
   data: PropType.object,
   focus: PropType.string,
-  active: PropType.any
+  active: PropType.any,
+  showHandler: PropType.bool
 }

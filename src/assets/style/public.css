@@ -99,7 +99,7 @@ div {
 }
 
 .config-bar {
-  width: 600px;
+  width: 800px;
   float: left;
   padding: 0 10px 0 0;
 }
@@ -236,4 +236,27 @@ div {
 
 .config-live-preview > div:first-child {
   box-shadow: 0 0 5px #ddd;
+}
+
+.el-removable-title {
+  position: relative;
+  font-size: 14px;
+}
+
+.el-removable-title .fa-close {
+  position: absolute;
+  right: 0;
+}
+
+.el-small-form.el-form .el-form-item {
+  line-height: 30px;
+  padding: 0;
+}
+
+.el-small-form.el-form .el-form-item .el-form-label {
+  font-size: 1rem;
+}
+
+.el-modal-wrapper .el-modal .el-modal-content {
+  width: 680px;
 }
