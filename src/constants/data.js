@@ -55,6 +55,8 @@ const getDefaultStyleOptions = () => {
   }]
 }
 
+// TODO: 配置可枚举的属性
+// TODO: 支持多个组件库
 export default {
   div: {
     displayName: '区块(div)',
@@ -1024,8 +1026,8 @@ export const category = {
   '文本/标题': ['div', 'span', 'p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5'],
   '布局': ['div', 'Grid.Row', 'Grid.Col'],
   '表单': ['Form', 'FormItem', 'Button', 'Input', 'NumberInput', 'TagInput', 'Select', 'Option', 'Radio', 'RadioGroup', 'Checkbox', 'CheckboxGroup', 'Upload', 'Datetime', 'Transfer', 'Editor'],
-  '展示': ['Tag', 'Button', 'Table', 'Col', 'Loading'],
-  '消息': ['Message', 'Tooltip', 'Popover'],
+  '展示': ['Tag', 'Button', 'Table', 'Col'],
+  '消息': ['Tooltip', 'Popover'],
   '导航': ['Dropdown', 'Tabs', 'Menu', 'MenuItem', 'SubMenu', 'MenuItemGroup'],
   '弹窗': ['Modal']
 }

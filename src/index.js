@@ -19,7 +19,73 @@ const BASE = {
   props: {
     style: {width: 800}
   },
-  children: [],
+  children: [{
+    key: 'root-button-0',
+    parentKey: 'root',
+    type: 'Button',
+    props: {
+      type: 'success',
+      children: '显示'
+    },
+    children: [],
+    controls: [],
+    events: {
+      onClick: [{
+        functionName: 'handleClick',
+        actions: [{
+          actionType: 'toggleVisibility',
+          actionComp: 'root-div-2',
+          actionConfig: {
+            visible: 'visible'
+          }
+        }]
+      }]
+    }
+  }, {
+    key: 'root-button-1',
+    type: 'Button',
+    parentKey: 'root',
+    props: {
+      type: 'danger',
+      children: '隐藏'
+    },
+    children: [],
+    controls: [],
+    events: {
+      onClick: [{
+        functionName: 'handleClick1',
+        actions: [{
+          actionType: 'toggleVisibility',
+          actionComp: 'root-div-2',
+          actionConfig: {
+            visible: 'hide'
+          }
+        }]
+      }]
+    }
+  }, {
+    key: 'root-div-2',
+    type: 'div',
+    parentKey: 'root',
+    props: {
+      style: {width: 500, backgroundColor: 'pink'}
+    },
+    children: [],
+    controls: [{
+      controlName: 'visible',
+      actionType: 'toggleVisibility',
+      conditions: [{
+        triggerKey: 'root-button-0',
+        conditionType: 'equal',
+        conditionValue: true
+      }, {
+        triggerKey: 'root-button-1',
+        conditionType: 'equal',
+        conditionValue: true
+      }]
+    }],
+    events: {}
+  }],
   controls: [],
   events: {}
 }
@@ -46,15 +112,16 @@ class Index extends Component {
       map: MAP,
       base: BASE,
       active: '',
-      stateMap: {},
       focus: 'root',
-      visible: false,
-      components: ['Input'],
-      configData: Object.assign({}, componentsData['div'].config),
       eventName: '',
-      actionType: '',
+      visible: false,
+      actions: [],
       functionName: '',
-      actionConfig: {}
+      currentEvent: -1,
+      currentAction: -1,
+      stateMap: {visible: true},
+      components: ['Message', 'Loading', 'Modal'],
+      configData: Object.assign({}, componentsData['div'].config)
     }
   }
 
@@ -116,14 +183,23 @@ class Index extends Component {
     })
   }
 
+  // 增加事件
   handleAddEvent (eventName) {
     this.setState(prev => {
+      if (prev.map[prev.focus].events[eventName]) {
+        // TODO
+        prev.functionName = prev.map[prev.focus].events[eventName][0].functionName
+        prev.actions = prev.map[prev.focus].events[eventName][0].actions
+        prev.currentAction = 0
+        prev.currentEvent = 0
+      }
       prev.eventName = eventName
       prev.visible = true
       return prev
     })
   }
 
+  // 关闭弹窗
   handleClose () {
     this.setState({visible: false, eventName: ''})
   }
@@ -131,35 +207,48 @@ class Index extends Component {
   // 选择组件
   handleChooseComp ({key}) {
     this.setState(prev => {
-      prev.actionConfig.actionComp = key
+      prev.actions[prev.currentAction].actionComp = key
       return prev
     })
   }
 
   // 选择动作
   handleChoseAction (actionType) {
-    let f = actionsData[actionType].functionName
-    let c = actionsData[actionType].config.controlName
-    if (this.funcNames[f]) {
-      f = f + (this.funcNames[f].length ? Math.max.apply(null, this.funcNames[f]) + 1 : 1)
+    let f = this.getFunctionName(actionsData[actionType].functionName)
+    let c = this.getControlName(actionsData[actionType].config.controlName)
+    let action = {
+      actionType,
+      actionConfig: Object.assign({}, actionsData[actionType].config)
     }
-    if (c && this.controlNames[c]) {
-      c = c + (this.controlNames[c].length ? Math.max.apply(null, this.controlNames[c]) + 1 : 1)
+    if (actionsData[actionType].choseComp) {
+      action.actionComp = this.state.focus
+    }
+    if (actionsData[actionType].config.controlName) {
+      action.actionConfig.controlName = c
     }
     this.setState(prev => {
-      prev.functionName = f
-      prev.actionType = actionType
-      prev.actionConfig = Object.assign({}, actionsData[actionType].config)
-      if (actionsData[actionType].choseComp) {
-        prev.actionConfig.actionComp = prev.focus
-      }
-      if (actionsData[actionType].config.controlName) {
-        prev.actionConfig.controlName = c
-      }
+      if (!prev.functionName) prev.functionName = f
+      prev.actions.splice(++prev.currentAction, 0, action)
       return prev
     })
   }
 
+  handleClickAction (index) {
+    this.setState(prev => {
+      prev.currentAction = index
+      return prev
+    })
+  }
+
+  handleRemoveAction (index) {
+    this.setState(prev => {
+      prev.currentAction = index === 0 ? 0 : index - 1
+      prev.actions.splice(index, 1)
+      return prev
+    })
+  }
+
+  // 修改方法名
   handleChangeF ({value}) {
     this.setState(prev => {
       prev.functionName = value
@@ -167,55 +256,77 @@ class Index extends Component {
     })
   }
 
+  // 获取方法名
+  getFunctionName (f) {
+    if (this.funcNames[f]) {
+      f = f + (this.funcNames[f].length ? Math.max.apply(null, this.funcNames[f]) + 1 : 1)
+    }
+    return f
+  }
+
+  // 获取控制名
+  getControlName (c) {
+    if (c && this.controlNames[c]) {
+      c = c + (this.controlNames[c].length ? Math.max.apply(null, this.controlNames[c]) + 1 : 1)
+    }
+    return c
+  }
+
   // 修改事件属性
   handleChangeAction ({name, value}) {
     this.setState(prev => {
-      prev.actionConfig[name] = value
+      prev.actions[prev.currentAction].actionConfig[name] = value
       return prev
     })
   }
 
-  // 添加事件属性
+  // 添加事件属性 TODO: 校验方法名的唯一性
   handleSaveAction () {
-    let {actionConfig, actionType, eventName, functionName, focus} = this.state
+    let {actions, focus, eventName, functionName} = this.state
     let fNum = functionName.match(/\d*$/)[0]
     let f = fNum ? functionName.replace(/\d*$/, '') : functionName
     if (!this.funcNames[f]) {
       this.funcNames[f] = []
     }
     if (fNum) this.funcNames[f].push(fNum)
-    if (actionConfig.controlName) {
-      let cNum = actionConfig.controlName.match(/\d*$/)[0]
-      let c = cNum ? actionConfig.controlName.replace(/\d*$/, '') : actionConfig.controlName
-      if (!this.controlNames[c]) {
-        this.controlNames[c] = []
-      }
-      if (cNum) this.controlNames[c].push(cNum)
-    }
+    // if (actionConfig.controlName) {
+    //   let cNum = actionConfig.controlName.match(/\d*$/)[0]
+    //   let c = cNum ? actionConfig.controlName.replace(/\d*$/, '') : actionConfig.controlName
+    //   if (!this.controlNames[c]) {
+    //     this.controlNames[c] = []
+    //   }
+    //   if (cNum) this.controlNames[c].push(cNum)
+    // }
     this.setState(prev => {
+      // 添加事件记录
       if (!prev.map[focus].events[eventName]) {
         prev.map[focus].events[eventName] = []
       }
-      prev.map[focus].events[eventName].push({
+      // 推入动作属性(方法名，配置，动作类型)
+      prev.map[focus].events[eventName][prev.currentEvent] = {
         functionName,
-        actionConfig,
-        actionType
-      })
-      if (actionConfig.controlName) {
-        prev.stateMap[actionConfig.controlName] = actionConfig.defaultControlValue
+        actions
       }
-      if (actionConfig.actionComp) {
-        prev.map[actionConfig.actionComp].controls.push(actionConfig.controlName)
-      }
-      prev.actionConfig = {}
+      // 添加默认state
+      // if (actionConfig.controlName) {
+      //   prev.stateMap[actionConfig.controlName] = actionConfig.defaultControlValue
+      // }
+      // 如果有联动，增加判断条件
+      // if (actionConfig.actionComp) {
+      //   prev.map[actionConfig.actionComp].controls.push({
+      //     controlName: actionConfig.controlName, // 变量名
+      //     conditions: actionsData[actionType].conditionRender(actionConfig)
+      //   })
+      // }
+      prev.currentAction = -1
       prev.functionName = ''
-      prev.actionType = ''
+      prev.actions = []
       return prev
     })
     this.handleClose()
   }
 
-  // 修改屬性
+  // 修改组件屬性
   handleChange ({name, value, type}) {
     this.setState(prev => {
       prev.configData[name] = ~styleMap.indexOf(name) && value === '' ? value : type === 'number' ? Number(value) : value
@@ -441,7 +552,7 @@ class Index extends Component {
       <div className='config-config-panel' style={{width: 200}}>
         <ASUMI.Button type='secondary' className='config-bar-title'>添加事件</ASUMI.Button>
         <div className='config-bar-config'>
-          <ul className='config-bar-components'>
+          <ul className='config-ul'>
             {Object.keys(events).map(e => {
               let invalid = events[e].expect && !~events[e].expect.indexOf(focusedType)
               return (
@@ -461,15 +572,16 @@ class Index extends Component {
   }
 
   modalRender () {
-    let {map, base, actionType, visible, actionConfig, functionName} = this.state
+    let {map, base, actions, visible, currentAction, functionName} = this.state
     return (
-      <ASUMI.Modal visible={visible} title='编辑事件' footer={null} onClose={() => this.handleClose()}>
+      <ASUMI.Modal visible={visible} title='编辑事件' onClose={() => this.handleClose()}
+        onOk={() => this.handleSaveAction()}>
         <ASUMI.Grid.Row>
           <ASUMI.Grid.Col col={2}>
             {Object.keys(actionTypes).map(a => {
               return (
-                <Panel title={a} key={a}>
-                  <ul className='config-bar-components'>
+                <Panel title={a} key={a} open>
+                  <ul className='config-ul'>
                     {actionTypes[a].map(aT => {
                       if (!actionsData[aT]) return null
                       return (
@@ -485,37 +597,50 @@ class Index extends Component {
               )
             })}
           </ASUMI.Grid.Col>
-          {actionType && actionsData[actionType].choseComp &&
-          <ASUMI.Grid.Col col={4}>
+          <ASUMI.Grid.Col col={2}>
+            <p>组织动作</p>
+            <ul className='config-ul'>
+              {actions.map((action, index) => {
+                return (
+                  <li key={index}
+                    onClick={currentAction !== index ? () => this.handleClickAction(index) : null}
+                    className={currentAction === index ? 'active' : ''}>
+                    {actionsData[action.actionType].displayName}
+                    <i className='fa fa-close' onClick={e => this.handleRemoveAction(index)} />
+                  </li>
+                )
+              })}
+            </ul>
+          </ASUMI.Grid.Col>
+          {!!~currentAction && actions.length && actionsData[actions[currentAction].actionType].choseComp &&
+          <ASUMI.Grid.Col col={3}>
             <div>请选择联动对象</div>
             <TreeSelect
               map={map}
               data={base}
               showHandler={false}
-              focus={actionConfig.actionComp}
+              focus={actions[currentAction].actionComp}
               onClick={(child) => this.handleChooseComp(child)}
             />
           </ASUMI.Grid.Col>}
-          <ASUMI.Grid.Col col={6}>
-            {!!actionType &&
+          {!!~currentAction && actions.length &&
+          <ASUMI.Grid.Col col={5}>
+            <ASUMI.FormItem
+              onChange={(e) => this.handleChangeF(e)}
+              value={functionName}
+              name='functionName'
+              label='方法名'
+            />
             <ASUMI.Form
               colon
               labelWidth={100}
-              submitText='保存'
-              data={actionConfig}
-              options={actionsData[actionType].props}
-              onSubmit={() => this.handleSaveAction()}
+              hideSubmitButton
+              data={actions[currentAction].actionConfig}
               onChange={(e) => this.handleChangeAction(e)}
-              title={`编辑${actionsData[actionType].displayName}`}
-            >
-              <ASUMI.FormItem
-                onChange={(e) => this.handleChangeF(e)}
-                value={functionName}
-                name='functionName'
-                label='方法名'
-              />
-            </ASUMI.Form>}
-          </ASUMI.Grid.Col>
+              options={actionsData[actions[currentAction].actionType].props}
+              title={`编辑${actionsData[actions[currentAction].actionType].displayName}`}
+            />
+          </ASUMI.Grid.Col>}
         </ASUMI.Grid.Row>
       </ASUMI.Modal>
     )
@@ -547,7 +672,7 @@ class Index extends Component {
               {Object.keys(category).map(c => {
                 return (
                   <Panel title={c} key={c}>
-                    <ul className='config-bar-components'>
+                    <ul className='config-ul'>
                       {category[c].map(comp => {
                         if (!componentsData[comp]) return
                         let invalid = componentsData[focusedType].single ||

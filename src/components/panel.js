@@ -5,7 +5,7 @@ import classnames from 'classnames'
 export default class Panel extends Component {
   constructor (props) {
     super(props)
-    this.state = {open: false}
+    this.state = {open: !!props.open}
     this.handleToggle = this.handleToggle.bind(this)
   }
 
@@ -27,5 +27,6 @@ export default class Panel extends Component {
 
 Panel.propTypes = {
   title: PropType.string,
-  children: PropType.any
+  children: PropType.any,
+  open: PropType.bool
 }

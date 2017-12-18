@@ -2,20 +2,19 @@ import React, { Component } from 'react'
 import PropType from 'prop-types'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import actionsData from '../constants/actions'
+import conditionMap from '../constants/condition'
 
-function getJSXStr ({type, props, events, controls, children}) {
-  let eventsItem = []
-  let propsInItem = []
-  let childrenArr = []
-  let controlsArr = []
+function getPropsArr (props) {
+  let propsItems = []
+  let childrenItems = []
   if (props) {
     Object.keys(props).forEach(k => {
       let item = props[k]
       if (k === 'children') {
-        childrenArr.push(item)
+        childrenItems.push(item)
       } else {
         if (typeof item === 'string') {
-          propsInItem.push(`${k}=${JSON.stringify(item)}`)
+          propsItems.push(`${k}=${JSON.stringify(item)}`)
         } else {
           if (k === 'style') {
             let style = {}
@@ -26,55 +25,98 @@ function getJSXStr ({type, props, events, controls, children}) {
                 style[s] = item[s]
               }
             })
-            if (valid) propsInItem.push(`${k}={${JSON.stringify(style)}}`)
+            if (valid) propsItems.push(`${k}={${JSON.stringify(style)}}`)
           } else {
-            propsInItem.push(`${k}={${JSON.stringify(item)}}`)
+            propsItems.push(`${k}={${JSON.stringify(item)}}`)
           }
         }
       }
     })
   }
+  return {propsItems, childrenItems}
+}
+
+function getEventsArr (events) {
+  let eventsItems = []
   if (events) {
-    Object.keys(events).forEach(trigger => {
-      let actions = events[trigger] // Array<object> functionName, actionType, actionConfig
-      let funcs = actions.map(action => {
-        return `this.${action.functionName}`
+    Object.keys(events).forEach(eventType => {
+      /* eventType: [{
+        functionName: String,
+        actions: [{
+          actionType: String,
+          actionConfig: Object
+        }]
+      }]
+    */
+      let funcs = events[eventType].map(({functionName}) => {
+        return `this.${functionName}`
       })
       if (funcs.length === 1) {
-        eventsItem.push(`${trigger}={${funcs[0]}.bind(this)}`)
+        eventsItems.push(`${eventType}={${funcs[0]}.bind(this)}`)
       } else if (funcs.length) {
-        eventsItem.push(`${trigger}={(e) => {
+        eventsItems.push(`${eventType}={(e) => {
           ${funcs.map(f => { return `${f}(e)` }).join(';')}
         }}`)
       }
     })
   }
-  if (controls) {
-    controls.forEach(v => {
-      controlsArr.push(v + ' &&')
-    })
-  }
-  if (children) {
-    childrenArr = childrenArr.concat(children.map(child => {
+  return eventsItems
+}
+
+function getJSXStr ({type, props, events, controls, children}) {
+  let controlsForSelf = []
+  let controlsForChildren = []
+  let {propsItems, childrenItems} = getPropsArr(props)
+  let eventsItems = getEventsArr(events)
+  if (children && children.length) {
+    childrenItems = childrenItems.concat(children.map(child => {
       return getJSXStr(child)
     }))
   }
-  return (`${controlsArr.length ? '{ ' + controlsArr.join('') + ' ' : ''}<${type}${propsInItem.length ? ' ' : ''}${propsInItem.join(' ')}${eventsItem.length ? ' ' : ''}${eventsItem.join(' ')}${childrenArr.length ? `>
-  ${childrenArr.join('')}
-</${type}>` : ' />'}${controlsArr.length ? '}' : '' }`)
+  if (controls) {
+    // controls.forEach(({controlName, conditions}) => {
+    //   conditions.forEach(({conditionType, conditionValue, type}) => {
+    //     let conditionStr = `${conditionMap[conditionType]('this.state.' + controlName, conditionValue)} &&`
+    //     if (type === 'self' || !type) {
+    //       controlsForSelf.push(conditionStr)
+    //     } else if (type === 'children') {
+    //       controlsForChildren.push(conditionStr)
+    //     }
+    //   })
+    // })
+  }
+  return (`${controlsForSelf.length ? `{${controlsForSelf.join(' ')} ` : ''}<${type}${propsItems.length ? ` ${propsItems.join(' ')}` : ''}
+            ${eventsItems.length ? ` ${eventsItems.join(' ')}` : ''}${childrenItems.length ? `>
+  ${controlsForChildren.length ? `{ ${controlsForChildren.join(' ')} ` : ''}${childrenItems.join('')}${controlsForChildren.length ? '}' : ''}
+</${type}>` : ' />'}${controlsForSelf.length ? `}` : '' }`)
 }
 
 function getFuncStr (map) {
   let output = []
+  /* eventType: [{
+      functionName: String,
+      actions: [{
+        actionType: String,
+        actionConfig: Object
+      }]
+    }]
+  */
   Object.keys(map).forEach(key => {
     let events = map[key].events
     if (events) {
-      Object.keys(events).forEach(trigger => {
-        let actions = events[trigger]
-        actions.forEach(func => { // Array<object> functionName, actionType, actionConfig
+      Object.keys(events).forEach(eventType => {
+        let funcs = events[eventType]
+        funcs.forEach(({functionName, actions}) => {
+          let funcArr = []
+          let stop = false
+          actions.forEach(({actionType, actionConfig}, index) => {
+            if (stop) return
+            stop = actionType === 'wait'
+            funcArr.push(actionsData[actionType].render(actionConfig, actions, index))
+          })
           output.push(`
-    ${func.functionName} (e) {
-      ${actionsData[func.actionType].render(func.actionConfig)}
+    ${functionName} (e) {
+      ${funcArr.join('\r\n')}
     }`)
         })
       })

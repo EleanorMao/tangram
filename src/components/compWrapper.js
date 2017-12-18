@@ -32,12 +32,14 @@ export default class CompWrapper extends Component {
   }
 
   handleClick (e) {
-    // e.preventDefault()
-    // e.stopPropagation()
+    e.preventDefault()
+    e.stopPropagation()
     this.props.onClick && this.props.onClick(e)
   }
 
   handleMouseOut (e) {
+    e.preventDefault()
+    e.stopPropagation()
     this.props.onMouseOut && this.props.onMouseOut(e)
   }
 

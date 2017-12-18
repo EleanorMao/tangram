@@ -132,7 +132,7 @@ div {
   min-width: auto;
 }
 
-.config-bar-components > li {
+.config-ul > li {
   border-bottom: 1px dashed #ddd;
   padding: 0 10px;
   position: relative;
@@ -141,7 +141,11 @@ div {
   background: #f5f5f5;
 }
 
-.config-bar-components > li > button {
+.config-ul > li.active {
+  color: #2aa5ff;
+}
+
+.config-ul > li > button {
   position: absolute;
   right: 0;
 }
@@ -258,5 +262,9 @@ div {
 }
 
 .el-modal-wrapper .el-modal .el-modal-content {
-  width: 680px;
+  width: 750px;
+}
+
+.config-live-preview {
+  margin-top: 10px;
 }
