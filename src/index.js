@@ -36,7 +36,7 @@ const BASE = {
           actionType: 'toggleVisibility',
           actionComp: 'root-div-2',
           actionConfig: {
-            visible: 'visible'
+            visible: 'show'
           }
         }]
       }]

@@ -63,7 +63,7 @@ function getEventsArr (events) {
   return eventsItems
 }
 
-function getJSXStr ({type, props, events, controls, children}) {
+function getJSXStr ({type, key, props, events, controls, children}) {
   let controlsForSelf = []
   let controlsForChildren = []
   let {propsItems, childrenItems} = getPropsArr(props)
@@ -86,7 +86,7 @@ function getJSXStr ({type, props, events, controls, children}) {
     // })
   }
   return (`${controlsForSelf.length ? `{${controlsForSelf.join(' ')} ` : ''}<${type}${propsItems.length ? ` ${propsItems.join(' ')}` : ''}
-            ${eventsItems.length ? ` ${eventsItems.join(' ')}` : ''}${childrenItems.length ? `>
+            ${eventsItems.length ? ` ${eventsItems.join(' ')}` : ''}${controls && controls.length ? `ref='${key}'` : ''}${childrenItems.length ? `>
   ${controlsForChildren.length ? `{ ${controlsForChildren.join(' ')} ` : ''}${childrenItems.join('')}${controlsForChildren.length ? '}' : ''}
 </${type}>` : ' />'}${controlsForSelf.length ? `}` : '' }`)
 }
@@ -109,10 +109,10 @@ function getFuncStr (map) {
         funcs.forEach(({functionName, actions}) => {
           let funcArr = []
           let stop = false
-          actions.forEach(({actionType, actionConfig}, index) => {
+          actions.forEach(({actionType, actionConfig, actionComp}, index) => {
             if (stop) return
             stop = actionType === 'wait'
-            funcArr.push(actionsData[actionType].render(actionConfig, actions, index))
+            funcArr.push(actionsData[actionType].render(actionConfig, actionComp, actions, index))
           })
           output.push(`
     ${functionName} (e) {

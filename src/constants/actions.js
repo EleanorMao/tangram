@@ -61,9 +61,7 @@ const ActionsData = {
     functionName: 'handleVisible',
     choseComp: true,
     config: {
-      visible: 'hide',
-      controlName: 'visible',
-      defaultControlValue: true
+      visible: 'hide'
     },
     props: [{
       label: '显示',
@@ -79,37 +77,18 @@ const ActionsData = {
         label: '切换可见性',
         value: 'toggle'
       }]
-    }, {
-      label: '默认显示',
-      name: 'defaultControlValue',
-      type: 'switch',
-      off: false,
-      on: true
-    }, {
-      label: '阻止默认事件',
-      name: 'preventDefault',
-      type: 'switch',
-      off: false,
-      on: true
     }],
-    conditionRender () {
-      return [{
-        conditionType: 'equal',
-        conditionValue: true
-      }]
-    },
-    render (actionConfig) {
-      let output = []
+    render (actionConfig, actionComp) {
+      // TODO: 非最优方案
       if (actionConfig.visible === 'hide') {
-        output.push(`this.setState({${actionConfig.controlName}: false})`)
+        return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = 'none'`
       }
       if (actionConfig.visible === 'show') {
-        output.push(`this.setState({${actionConfig.controlName}: true})`)
+        return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = 'none'`
       }
       if (actionConfig.visible === 'toggle') {
-        output.push(`this.setState({${actionConfig.controlName}: !this.state.${actionConfig.controlName}})`)
+        return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display === 'none' ? 'block': 'none' `
       }
-      return output.join('\r\n')
     }
   },
   'wait': {
@@ -125,14 +104,14 @@ const ActionsData = {
       type: 'number',
       step: 100
     }],
-    render ({duration}, actions, index) {
+    render ({duration}, actionComp, actions, index) {
       let otherActions = actions.slice(index + 1)
       let funcArr = []
       let stop = false
-      otherActions.forEach(({actionType, actionConfig}, i) => {
+      otherActions.forEach(({actionType, actionConfig, actionComp}, i) => {
         if (stop) return
         stop = actionType === 'wait'
-        funcArr.push(ActionsData[actionType].render(actionConfig, actions, index + i + 1))
+        funcArr.push(ActionsData[actionType].render(actionConfig, actionComp, actions, index + i + 1))
       })
       return `setTimeout(() => {
         ${funcArr.join('\r\n')}
@@ -258,6 +237,16 @@ const ActionsData = {
     render (actionConfig) {
       return `Modal.confirm(${JSON.stringify(actionConfig)})`
     }
+  },
+  'setProps': {
+    displayName: '改变属性',
+    functionName: 'handleSetProps',
+    choseComp: true,
+    copyCompProps: true,
+    config: {},
+    props: [],
+    render (actionConfig, actionComp, actions, index) {
+    }
   }
 }
 
@@ -316,3 +305,5 @@ export const events = {
     controlName: '', //state的名字
   }]
  */
+
+/* TODO: 设置变量[onChange函数]，对象包括出去Button以外的表单组件 */
