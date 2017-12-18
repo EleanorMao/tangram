@@ -65,17 +65,25 @@ export default {
     functionName: 'handleVisible',
     choseComp: true,
     config: {
-      visible: false,
+      visible: 'hide',
       preventDefault: true,
       controlName: 'visible',
       defaultControlValue: true
     },
     props: [{
-      label: '显示模块',
+      label: '显示',
       name: 'visible',
-      type: 'switch',
-      off: false,
-      on: true
+      type: 'radiogroup',
+      options: [{
+        label: '显示',
+        value: 'show'
+      }, {
+        label: '隐藏',
+        value: 'hide'
+      }, {
+        label: '切换可见性',
+        value: 'toggle'
+      }]
     }, {
       label: '默认显示',
       name: 'defaultControlValue',
@@ -94,8 +102,33 @@ export default {
       if (actionConfig.preventDefault) {
         output.push('e.preventDefault()')
       }
-      output.push(`this.setState({visible: ${actionConfig.visible}})`)
+      if (actionConfig.visible === 'hide') {
+        output.push(`this.setState({${actionConfig.controlName}: false})`)
+      }
+      if (actionConfig.visible === 'show') {
+        output.push(`this.setState({${actionConfig.controlName}: true})`)
+      }
+      if (actionConfig.visible === 'toggle') {
+        output.push(`this.setState({${actionConfig.controlName}: !this.state.${actionConfig.controlName}})`)
+      }
       return output.join('\r\n')
+    }
+  },
+  'setText': {
+    displayName: '设置文本',
+    functionName: 'handleSetText',
+    choseComp: true,
+    config: {
+      controlName: 'value',
+      text: ''
+    },
+    props: [{
+      name: 'text',
+      label: '文本内容',
+      type: 'textarea'
+    }],
+    render (actionConfig) {
+      return `this.setState({${actionConfig.controlName}: ${actionConfig.text})`
     }
   }
 }
@@ -137,3 +170,17 @@ export const events = {
     expect: ['Modal', 'Loading']
   }
 }
+
+/*
+  影响类型:
+    1. 影响组件渲染 visible && <div />
+    2. 影响children显示 <div>{visible && 'abc'}</div>
+    3. 影响children内容 <div>{value}</div>
+  条件判断:
+    1. if...elseif...else
+    1. && 和
+    2. || 或
+  controls: [{
+    controlName: '', //state的名字
+  }]
+ */
