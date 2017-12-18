@@ -1,4 +1,4 @@
-import componentsData from '../constants/data'
+import componentsData from '../constants/components'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import classnames from 'classnames'
@@ -60,13 +60,17 @@ export default class CompWrapper extends Component {
       'component-focus': __focus === __id,
       'component-active': __active === __id
     })
-    let focusLabel = __focus === __id && !((config.invalid && ~config.invalid.indexOf('span')) ||
+    let focusLabel = config && __focus === __id && !((config.invalid && ~config.invalid.indexOf('span')) ||
       (config.expect && !~config.expect.indexOf('span')))
       ? <span className='component-name'
-        style={{minWidth: config.displayName.length * 13 + 10}}>{config.displayName}</span> : null
+              style={{minWidth: config.displayName.length * 13 + 10}}>{config.displayName}</span> : null
     let Comp = isComp ? __type.indexOf('.') > -1 ? ASUMI[__type.split('.')[0]][__type.split('.')[1]] : ASUMI[__type] : __type
-    if (config.single) {
-      return <ASUMI.Tooltip title={config.displayName} placement='top'><Comp className={className} {...props} /></ASUMI.Tooltip>
+    if (!config) {
+      Comp = 'div'
+    }
+    if (config && config.single) {
+      return <ASUMI.Tooltip title={config.displayName} placement='top'><Comp
+        className={className} {...props} /></ASUMI.Tooltip>
     } else {
       return <Comp key={__id} {...props} className={className}>{focusLabel}{children}</Comp>
     }

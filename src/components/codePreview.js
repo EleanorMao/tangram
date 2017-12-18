@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import PropType from 'prop-types'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import actionsData from '../constants/actions'
-import conditionMap from '../constants/condition'
+// import conditionMap from '../constants/condition'
+import * as TEMPS from '../templates'
 
 function getPropsArr (props) {
   let propsItems = []
@@ -127,31 +128,17 @@ function getFuncStr (map) {
 
 export default class CodePreview extends Component {
   render () {
-    let {data, map, stateMap, components} = this.props
+    let {data, map, stateMap, modules, template} = this.props
     let code = [data].map(item => {
       return getJSXStr(item)
     })[0]
     let func = getFuncStr(map)
+    let modulesArr = Object.keys(modules).map(module => {
+      return `import {${modules[module].join(', ')}} from '${module}'`
+    })
     return (
       <SyntaxHighlighter>
-        {`
-  import React, { Component } from 'react'
-  import ReactDOM from 'react-dom'${components.length ? `
-  import {${components.join(', ')}} from 'asumi'` : ''}
-
-  export default Class Main extends Component {
-    constructor () {
-      super()
-      this.state = ${JSON.stringify(stateMap)}
-    }
-    ${func.join('\r\n')}
-    render () {
-      return (
-        ${code}
-    )
-  }
-}
-          `}
+        {TEMPS['default'][template](code, func, modulesArr, stateMap)}
       </SyntaxHighlighter>
     )
   }
@@ -161,5 +148,6 @@ CodePreview.propTypes = {
   map: PropType.object,
   data: PropType.object,
   stateMap: PropType.object,
-  components: PropType.array
+  template: PropType.string,
+  modules: PropType.object
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropType from 'prop-types'
 import classnames from 'classnames'
-import componentsData from '../constants/data'
+import componentsData from '../constants/components'
 
 export default class TreeSelect extends Component {
   constructor (props) {
@@ -41,7 +41,7 @@ export default class TreeSelect extends Component {
             onMouseOver={focused ? null : (e) => this.handleAction(e, 'onActive', child.key)}
           >
             {hasChildren && <i className='fa fa-caret-down'
-              style={{marginRight: 3}} />}{componentsData[child.type].displayName}{isRoot && '【根节点】'}
+              style={{marginRight: 3}} />}{componentsData[child.type] ? componentsData[child.type].displayName : child.type }{isRoot && '【根节点】'}
             {!isRoot && (actived || focused) && showHandler &&
             <div className='el-tree-select-handler'>
               {!!showMoveUp && <i className='fa fa-arrow-up' onClick={(e) => this.handleAction(e, 'onMoveUp', child)} />}

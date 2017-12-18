@@ -1029,5 +1029,6 @@ export const category = {
   '展示': ['Tag', 'Button', 'Table', 'Col'],
   '消息': ['Tooltip', 'Popover'],
   '导航': ['Dropdown', 'Tabs', 'Menu', 'MenuItem', 'SubMenu', 'MenuItemGroup'],
-  '弹窗': ['Modal']
+  '弹窗': ['Modal'],
+  '业务组件': ['主面板', '数据表格']
 }

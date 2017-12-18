@@ -84,7 +84,7 @@ const ActionsData = {
         return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = 'none'`
       }
       if (actionConfig.visible === 'show') {
-        return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = 'none'`
+        return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = 'block'`
       }
       if (actionConfig.visible === 'toggle') {
         return `ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display = ReactDOM.findDOMNode(this.refs['${actionComp}']).style.display === 'none' ? 'block': 'none' `

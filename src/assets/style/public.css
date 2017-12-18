@@ -8,11 +8,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #eee
+  background: rgba(69, 90, 100, 1)
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ddd;
+  background: rgba(120, 144, 156, 1);
   border-radius: 8px
 }
 
@@ -20,15 +20,77 @@ div {
   min-height: 10px !important;
 }
 
-.header {
-  top: 0;
-  left: 0;
-  right: 0;
+.config-ul > li {
+  padding: 0 10px;
   color: #fff;
-  height: 60px;
-  z-index: 999;
+  position: relative;
+  line-height: 35px;
+  height: 35px;
+}
+
+.config-ul > li.active {
+  color: #2aa5ff;
+}
+
+.config-ul > li > .handler, .config-ul > li > button {
+  position: absolute;
+  right: 0;
+}
+
+.el-panel-title {
+  color: #5e5e5e;
+  height: 40px;
+  line-height: 40px;
+  position: relative;
+  font-size: 1.1538rem;
+  padding: 0 10px;
+  border-bottom: 1px dotted #ddd;
+}
+
+.el-panel-title:after {
+  top: 1rem;
+  content: "\F107";
+  right: 1.5384rem;
+  position: absolute;
+  text-rendering: auto;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
+  font: normal normal normal 14px/1 FontAwesome;
+  transition: -webkit-transform 0.3s ease-in;
+  transition: transform 0.3s ease-in, -webkit-transform 0.3s ease-in;
+  -webkit-transition: -webkit-transform 0.3s ease-in;
+}
+
+.el-panel-title.el-panel-open:after {
+  transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+}
+
+.el-panel-body {
+  background: rgba(84, 110, 122, 1);
+  border-bottom: 1px dotted #ddd;
+}
+
+.el-panel-body .el-panel-title {
+  height: 35px;
+  font-size: 14px;
+  line-height: 35px;
+}
+
+.el-panel-body .el-panel:last-child .el-panel-body {
+  border-bottom: none;
+}
+
+.wrapper {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.header {
+  color: #fff;
+  flex: 0 0 60px;
   font-size: 30px;
-  position: fixed;
   line-height: 60px;
   background: #3ca4f7;
   padding: 0 30px;
@@ -46,12 +108,85 @@ div {
   color: #fff;
 }
 
-.content {
-  margin-left: 200px;
-  margin-top: 60px;
-  padding: 20px 50px;
-  min-height: 300px;
-  margin-bottom: 30px
+.body {
+  flex: 1;
+  display: flex;
+}
+
+.body .el-panel-title {
+  color: #fff;
+}
+
+.body .content {
+  flex: 1;
+}
+
+.body .tool-bar {
+  background: rgba(69, 90, 100, 1);
+  flex-direction: column;
+  flex: 0 0 200px;
+  display: flex;
+  order: -1;
+}
+
+.body .config-bar {
+  background: rgba(69, 90, 100, 1);
+  flex-direction: column;
+  flex: 0 0 250px;
+}
+
+.body .config-bar > section {
+}
+
+.config-bar .config-bar-config {
+  padding: 0 8px;
+  color: #fff;
+}
+
+.config-bar .el-form .el-form-item {
+  padding: 3px 0;
+}
+
+.config-bar .el-form .el-form-item .el-form-label {
+  min-height: 25px;
+  line-height: 25px;
+  font-size: 1rem;
+}
+
+.config-bar .el-input > input, .el-input > textarea {
+  min-height: 20px;
+  line-height: 1;
+}
+
+.config-bar .el-input-wrapper.el-number-input .el-input-append .el-number-input-handler {
+  min-height: 17px;
+}
+
+.config-bar .el-input .el-input-icon {
+  line-height: 1.2;
+}
+
+.body .tool-bar > section.tool-component {
+  flex: 1;
+  overflow: auto;
+}
+
+.body .config-bar > section.config-action-panel {
+  max-height: 150px;
+}
+
+.body .config-bar > section.config-action-panel .el-panel-body {
+  overflow: auto;
+  height: 110px;
+}
+
+.body .config-bar > section.config-props-panel {
+  max-height: 250px;
+}
+
+.body .config-bar > section.config-props-panel .el-panel-body {
+  overflow: auto;
+  height: 210px;
 }
 
 .component {
@@ -63,13 +198,11 @@ div {
 }
 
 .component.component-focus {
-  /*z-index: 0;*/
   position: relative;
   box-shadow: 0 0 5px #2aa5ff;
 }
 
 .component.component-focus:before {
-  /*content: '';*/
   position: absolute;
   top: 0;
   left: 0;
@@ -98,21 +231,9 @@ div {
   font-size: 13px;
 }
 
-.config-bar {
-  width: 800px;
-  float: left;
-  padding: 0 10px 0 0;
-}
-
 .config-preview {
   padding-left: 8px;
-  overflow: hidden;
-}
-
-.config-bar .config-bar-title {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
+  overflow: auto;
 }
 
 .config-bar .config-bar-current {
@@ -120,51 +241,6 @@ div {
   margin: 0 15px;
   font-weight: 800;
   text-decoration: underline;
-}
-
-.config-bar .config-bar-config {
-  padding: 0 8px;
-  margin-top: 5px;
-  border: 1px dashed #ddd;
-}
-
-.config-bar .el-form .el-form-item .el-form-label {
-  min-width: auto;
-}
-
-.config-ul > li {
-  border-bottom: 1px dashed #ddd;
-  padding: 0 10px;
-  position: relative;
-  line-height: 35px;
-  height: 35px;
-  background: #f5f5f5;
-}
-
-.config-ul > li.active {
-  color: #2aa5ff;
-}
-
-.config-ul > li > button {
-  position: absolute;
-  right: 0;
-}
-
-.config-dom-tree {
-  width: 190px;
-  float: left;
-  padding-top: 10px;
-  display: inline-block;
-}
-
-.el-tree-select {
-  border-top: 1px dotted #ddd;
-}
-
-.config-config-panel {
-  width: 250px;
-  float: left;
-  padding-left: 10px;
 }
 
 .el-tree-select-leaf {
@@ -175,6 +251,10 @@ div {
   position: relative;
   text-transform: lowercase;
   border-bottom: 1px dotted #ddd;
+}
+
+.el-tree-select-leaf:last-child {
+  border-bottom: none;
 }
 
 .el-tree-select-leaf-active {
@@ -199,38 +279,6 @@ div {
   line-height: 30px;
   display: inline-block;
   margin-right: 2px;
-}
-
-.el-panel-title {
-  color: #5e5e5e;
-  height: 40px;
-  line-height: 40px;
-  position: relative;
-  font-size: 1.1538rem;
-  padding: 0 10px;
-  border-bottom: 1px dotted #ddd;
-  position: relative;
-}
-
-.el-panel-title:after {
-  top: 1rem;
-  content: "\F107";
-  right: 1.5384rem;
-  font-size: inherit;
-  position: absolute;
-  text-rendering: auto;
-  display: inline-block;
-  -webkit-font-smoothing: antialiased;
-  font: normal normal normal 14px/1 FontAwesome;
-  transition: -webkit-transform 0.3s ease-in;
-  transition: transform 0.3s ease-in;
-  transition: transform 0.3s ease-in, -webkit-transform 0.3s ease-in;
-  -webkit-transition: -webkit-transform 0.3s ease-in;
-}
-
-.el-panel-title.el-panel-open:after {
-  transform: rotate(-90deg);
-  -webkit-transform: rotate(-90deg);
 }
 
 .el-btn.el-disabled.el-small.el-text {
