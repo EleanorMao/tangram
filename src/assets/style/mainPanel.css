@@ -1,0 +1,44 @@
+.title {
+  margin-top: 10px;
+}
+
+.main-content {
+  background-color: #fff;
+}
+
+.search {
+  padding: 20px;
+  background: #E3F2FD;
+  min-width: 985px;
+}
+
+.search .el-form-item {
+  padding: 0;
+}
+
+.search .el-form-item .el-form-label {
+  font-size: 1rem;
+  text-align: left;
+}
+
+.search .el-form-item .el-form-control {
+  min-width: 200px;
+}
+
+.main-content h2.title {
+  font-size: 18px;
+  padding: 0 0 20px 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+.model {
+  height: 500px;
+  display: inline-block;
+  width: 50%;
+}
+
+.main {
+  overflow: auto;
+  width: 100%;
+}

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import componentsData from '../constants/components'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
@@ -12,6 +13,20 @@ export default class CompWrapper extends Component {
     this.handleClick = this.handleClick.bind(this)
     this.handleMouseOut = this.handleMouseOut.bind(this)
     this.handleMouseOver = this.handleMouseOver.bind(this)
+  }
+
+  componentWillMount () {
+    let {__type, __focus, __id, __active, onClick, onMouseOut, onMouseOver, children, ...others} = this.props
+    if (!__type) return
+    let config = componentsData[__type]
+    if (!config || !config.defaultState) return
+    let state = {}
+    Object.keys(others).forEach(p => {
+      if (typeof others[p] === 'string' && /^%s/.test(others[p])) {
+        state[others[p].replace(/^%s/, '')] = componentsData[__type].defaultState[p]
+      }
+    })
+    this.setState(state)
   }
 
   componentDidMount () {
@@ -50,11 +65,19 @@ export default class CompWrapper extends Component {
   }
 
   render () {
-    /* eslint-disable */
-    let {__type, __focus, __id, __active, onClick, onMouseOut, onMouseOver, children, ...props} = this.props
+    let {__type, __focus, __id, __active, onClick, onMouseOut, onMouseOver, children, ...others} = this.props
     if (!__type) return null
-    let isComp = /[A-Z]/.test(__type[0])
+    let Comp = 'div'
+    let props = {}
+    Object.keys(others).forEach(p => {
+      if (typeof others[p] === 'string' && /^%s/.test(others[p])) {
+        props[p] = this.state[others[p].replace(/^%s/, '')]
+      } else {
+        props[p] = others[p]
+      }
+    })
     let config = componentsData[__type]
+    let isComp = /[A-Z]/.test(__type[0])
     let className = classnames({
       'component': true,
       'component-focus': __focus === __id,
@@ -64,10 +87,7 @@ export default class CompWrapper extends Component {
       (config.expect && !~config.expect.indexOf('span')))
       ? <span className='component-name'
               style={{minWidth: config.displayName.length * 13 + 10}}>{config.displayName}</span> : null
-    let Comp = isComp ? __type.indexOf('.') > -1 ? ASUMI[__type.split('.')[0]][__type.split('.')[1]] : ASUMI[__type] : __type
-    if (!config) {
-      Comp = 'div'
-    }
+    if (config) Comp = config.compPath ? config.compPath : (isComp ? __type.indexOf('.') > -1 ? ASUMI[__type.split('.')[0]][__type.split('.')[1]] : ASUMI[__type] : __type)
     if (config && config.single) {
       return <ASUMI.Tooltip title={config.displayName} placement='top'><Comp
         className={className} {...props} /></ASUMI.Tooltip>

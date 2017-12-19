@@ -15,7 +15,11 @@ function getPropsArr (props) {
         childrenItems.push(item)
       } else {
         if (typeof item === 'string') {
-          propsItems.push(`${k}=${JSON.stringify(item)}`)
+          if (/^%s/.test(item)) {
+            propsItems.push(`${k}={${item.replace(/^%s/, 'this.state.')}}`)
+          } else {
+            propsItems.push(`${k}=${JSON.stringify(item)}`)
+          }
         } else {
           if (k === 'style') {
             let style = {}
@@ -108,6 +112,7 @@ function getFuncStr (map) {
       Object.keys(events).forEach(eventType => {
         let funcs = events[eventType]
         funcs.forEach(({functionName, actions}) => {
+          if (!actions) return
           let funcArr = []
           let stop = false
           actions.forEach(({actionType, actionConfig, actionComp}, index) => {
@@ -138,7 +143,7 @@ export default class CodePreview extends Component {
     })
     return (
       <SyntaxHighlighter>
-        {TEMPS['default'][template](code, func, modulesArr, stateMap)}
+        {TEMPS[template](code, func, modulesArr, stateMap)}
       </SyntaxHighlighter>
     )
   }

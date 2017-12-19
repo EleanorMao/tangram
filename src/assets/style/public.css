@@ -119,6 +119,7 @@ div {
 
 .body .content {
   flex: 1;
+  overflow: auto;
 }
 
 .body .tool-bar {
@@ -315,4 +316,24 @@ div {
 
 .config-live-preview {
   margin-top: 10px;
+}
+
+.el-modal-body .el-panel-body {
+  background: #fff;
+}
+
+.el-modal-body .config-ul > li {
+  color: #333;
+}
+
+.mgb10 {
+  margin-bottom: 10px;
+}
+
+.pdl20 {
+  padding-left: 20px;
+}
+
+.pdr20 {
+  padding-right: 20px;
 }

@@ -5,7 +5,7 @@ import Header from './components/header'
 import Panel from './components/panel'
 import TreeSelect from './components/treeSelect'
 import CodePreview from './components/codePreview'
-import componentsData, { category } from './constants/components'
+import componentsData, { category, DefaultModule } from './constants/components'
 import actionsData, { actionTypes, events } from './constants/actions'
 import templatesData, { BaseModel } from './constants/templates'
 import styleMap from './constants/style'
@@ -28,7 +28,8 @@ function getKey (focus, type, length) {
 class Index extends Component {
   constructor () {
     super()
-    const BASE = Object.assign({}, BaseModel.list)
+    const currentTemp = 'base'
+    const BASE = Object.assign({}, BaseModel[currentTemp])
     const MAP = {}
     getMap(BASE, MAP)
     this.funcNames = {}
@@ -41,14 +42,14 @@ class Index extends Component {
       focus: 'root',
       eventName: '',
       visible: false,
-      showCode: false,
+      showCode: true,
       functionName: '',
       currentEvent: -1,
       currentAction: -1,
-      currentTemp: 'list',
-      stateMap: Object.assign({}, templatesData.list.state),
-      modules: Object.assign({}, templatesData.list.modules),
-      configData: Object.assign({}, componentsData['div'].config)
+      currentTemp: currentTemp,
+      configData: Object.assign({}, componentsData['div'].config),
+      stateMap: Object.assign({}, templatesData[currentTemp].state),
+      modules: Object.assign({}, templatesData[currentTemp].modules)
     }
   }
 
@@ -57,6 +58,7 @@ class Index extends Component {
     if (temp === currentTemp) return
     ASUMI.Modal.confirm({
       title: '提示',
+      size: 'small',
       content: '切换模板后，所选的组件将会被清空',
       onOk: () => {
         const BASE = Object.assign({}, BaseModel[temp])
@@ -71,6 +73,8 @@ class Index extends Component {
           prev.stateMap = Object.assign({}, templatesData[temp].state)
           prev.modules = Object.assign({}, templatesData[temp].modules)
           return prev
+        }, () => {
+          this.handleFocus(BASE)
         })
       }
     })
@@ -92,9 +96,11 @@ class Index extends Component {
       }
     })
     this.setState(prev => {
-      // TODO: 不同組件進入不同的模塊
-      if (/[A-Z]/.test(type[0]) && modules.asumi.indexOf(type) < 0 && componentsData[type]) {
-        prev.modules.asumi.push(type)
+      if (/[A-Z]/.test(type[0]) && modules.asumi.indexOf(type) < 0) {
+        let modules = componentsData[type].modules || DefaultModule
+        if (modules[modules].indexOf(type) < 0) {
+          prev.modules[modules].push(type)
+        }
       }
       let children = prev.map[focus].children
       let key = getKey(focus, type, children.length)
@@ -407,17 +413,16 @@ class Index extends Component {
 
   // 页面预览
   previewRender (child) {
-    let {focus, active} = this.state
+    let {focus, active, currentTemp} = this.state
     let {type, key, props, children} = child
     let previewProps = {
       onClick: () => this.handleFocus(child),
       onMouseOut: () => this.handleActive(''),
       onMouseOver: focus === key ? null : () => this.handleActive(key)
     }
-
     return (
       <CompWrapper
-        key={key}
+        key={currentTemp + '_' + key}
         __id={key}
         __type={type}
         __focus={focus}
@@ -437,7 +442,7 @@ class Index extends Component {
     let {map, base, actions, visible, currentAction, functionName} = this.state
     return (
       <ASUMI.Modal visible={visible} title='编辑事件' onClose={() => this.handleClose()}
-        onOk={() => this.handleSaveAction()}>
+                   onOk={() => this.handleSaveAction()}>
         <ASUMI.Grid.Row>
           <ASUMI.Grid.Col col={2}>
             {Object.keys(actionTypes).map(a => {
@@ -465,10 +470,10 @@ class Index extends Component {
               {actions.map((action, index) => {
                 return (
                   <li key={index}
-                    onClick={currentAction !== index ? () => this.handleClickAction(index) : null}
-                    className={currentAction === index ? 'active' : ''}>
+                      onClick={currentAction !== index ? () => this.handleClickAction(index) : null}
+                      className={currentAction === index ? 'active' : ''}>
                     {actionsData[action.actionType].displayName}
-                    <i className='fa fa-close' onClick={e => this.handleRemoveAction(index)} />
+                    <i className='fa fa-close' onClick={e => this.handleRemoveAction(index)}/>
                   </li>
                 )
               })}
@@ -519,7 +524,7 @@ class Index extends Component {
           this.setState({showCode: !showCode})
         }}>{showCode ? '收起' : '查看'}代码</ASUMI.Button>
         {showCode &&
-        <CodePreview data={base} map={map} modules={modules} stateMap={stateMap} template={currentTemp} />}
+        <CodePreview data={base} map={map} modules={modules} stateMap={stateMap} template={currentTemp}/>}
       </section>
     )
   }
@@ -531,7 +536,8 @@ class Index extends Component {
         <Panel title='选择模板' open>
           <ul className='config-ul'>
             {Object.keys(templatesData).map(temp => {
-              return <li key={temp} onClick={() => this.handleChoseTemp(temp)}>{templatesData[temp].displayName}</li>
+              return <li key={temp} className={temp === this.state.currentTemp ? 'active' : ''}
+                         onClick={() => this.handleChoseTemp(temp)}>{templatesData[temp].displayName}</li>
             })}
           </ul>
         </Panel>
@@ -560,7 +566,7 @@ class Index extends Component {
                         {invalid
                           ? <ASUMI.Button type='text' size='small' disabled>不可添加</ASUMI.Button>
                           : <ASUMI.Button type='text' size='small'
-                            onClick={() => this.handleAdd(comp)}>添加</ASUMI.Button>}
+                                          onClick={() => this.handleAdd(comp)}>添加</ASUMI.Button>}
                       </li>)
                   })}
                 </ul>
@@ -580,7 +586,8 @@ class Index extends Component {
     let mapableProps = currentConfig && currentConfig.mapableProps && Object.keys(currentConfig.mapableProps)
     return (
       <section className='config-props-panel'>
-        <Panel title={`属性配置 ${componentsData[focusedType] ? componentsData[focusedType].displayName : focusedType}`} open>
+        <Panel title={`属性配置 ${componentsData[focusedType] ? componentsData[focusedType].displayName : focusedType}`}
+               open>
           <div className='config-bar-config'>
             {componentsData[focusedType] &&
             <ASUMI.Form
@@ -606,7 +613,7 @@ class Index extends Component {
                         labelWidth={40}
                         title={<div className='el-removable-title'>
                           第{index + 1}项
-                          <i className='fa fa-close' onClick={(e) => this.handleRemoveMapProps(e, propName, index)} />
+                          <i className='fa fa-close' onClick={(e) => this.handleRemoveMapProps(e, propName, index)}/>
                         </div>}
                         layout='inline'
                         hideSubmitButton
@@ -620,7 +627,7 @@ class Index extends Component {
                     size='small'
                     type='primary'
                     onClick={() => this.handleAddMapProps(propName, mapItem.config)}>
-                    <i className='fa fa-plus' /> 添加{mapItem.displayName || propName}
+                    <i className='fa fa-plus'/> 添加{mapItem.displayName || propName}
                   </ASUMI.Button>
                 </div>
               )
@@ -684,7 +691,7 @@ class Index extends Component {
   render () {
     return (
       <div className='wrapper'>
-        <Header />
+        <Header/>
         <section className='body'>
           <aside className='tool-bar'>
             {this.templateRender()}
@@ -705,4 +712,4 @@ class Index extends Component {
   }
 }
 
-ReactDOM.render(<Index />, document.querySelector('#app'))
+ReactDOM.render(<Index/>, document.querySelector('#app'))

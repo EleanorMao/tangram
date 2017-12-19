@@ -7,15 +7,21 @@ export default {
     state: {}
   },
   'list': {
-    displayName: '列表页',
+    displayName: 'C网列表页',
     modules: {
-      'asumi': ['Message', 'Loading', 'Modal'],
-      'common': ['MainPanel', 'RemoteTable']
+      'asumi': ['Message', 'Button', 'Modal', 'Col'],
+      'lib/js': ['MainPanel', 'RemoteTable']
     },
     state: {
-      search: {},
       data: {},
-      page: 1
+      page: 1,
+      modalData: '',
+      totalSize: 0,
+      showLoad: false,
+      showModal: false,
+      optionsList: [],
+      sizePerPage: 10,
+      checkedList: []
     }
   }
 }
@@ -100,19 +106,67 @@ export const BaseModel = {
   list: {
     key: 'root',
     type: 'MainPanel',
-    props: {},
+    props: {
+      form: [{
+        name: 'loginNam',
+        text: '用户名'
+      }],
+      buttons: [],
+      data: '%sdata',
+      showLoad: '%sshowLoad'
+    },
     children: [{
       key: 'root-table-0',
       parentKey: 'root',
       type: 'RemoteTable',
       props: {
-        data: []
+        isKey: 'id',
+        page: '%spage',
+        data: '%soptionsList',
+        totalSize: '%stotalSize',
+        selected: '%scheckedList',
+        sizePerPage: '%ssizePerPage'
       },
-      children: [],
+      children: [{
+        key: 'root-table-tablerow-0',
+        parentKey: 'root-table-0',
+        type: 'Col',
+        props: {
+          dataField: 'id',
+          children: '操作'
+        },
+        children: [],
+        controls: [],
+        events: {
+          dataFormat: [{
+            functionName: 'controlRender'
+          }]
+        }
+      }],
       controls: [],
-      events: {}
+      events: {
+        pageChange: [{
+          functionName: 'init'
+        }],
+        handleSelect: [{
+          functionName: 'handleSelect'
+        }],
+        handleSelectAll: [{
+          functionName: 'handleSelectAll'
+        }]
+      }
     }],
     controls: [],
-    events: {}
+    events: {
+      init: [{
+        functionName: 'init'
+      }],
+      handleChange: [{
+        functionName: 'handleChange'
+      }],
+      handleReset: [{
+        functionName: 'handleReset'
+      }]
+    }
   }
 }

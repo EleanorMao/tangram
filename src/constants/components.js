@@ -1,3 +1,7 @@
+import { MainPanel, RemoteTable } from '../modules'
+
+export const DefaultModule = 'asumi'
+
 const getDefaultStyle = () => {
   return {
     paddingLeft: '',
@@ -56,7 +60,6 @@ const getDefaultStyleOptions = () => {
 }
 
 // TODO: 配置可枚举的属性
-// TODO: 支持多个组件库
 export default {
   div: {
     displayName: '区块(div)',
@@ -1019,16 +1022,67 @@ export default {
       label: '提交按钮',
       name: 'submitText'
     }]
+  },
+  MainPanel: {
+    displayName: '主面板',
+    modules: 'lib/js',
+    compPath: MainPanel,
+    defaultState: {
+      page: 1,
+      data: {},
+      showLoad: false
+    },
+    config: {
+      form: [],
+      buttons: [],
+      data: '%sdata',
+      showLoad: '%sshowLoad'
+    },
+    props: [{
+      name: 'data',
+      label: 'data变量',
+      placeholder: '%s表示state'
+    }, {
+      name: 'showLoad',
+      label: 'showLoad变量',
+      placeholder: '%s表示state'
+    }],
+    mapableProps: {
+      form: {
+        displayName: '查询条件',
+        config: {
+          name: '',
+          text: ''
+        },
+        props: [{
+          label: '变量名',
+          name: 'name',
+          size: 'small'
+        }, {
+          label: '名称',
+          name: 'text',
+          size: 'small'
+        }]
+      }
+    }
+  },
+  RemoteTable: {
+    displayName: '业务表格',
+    modules: 'lib/js',
+    compPath: RemoteTable,
+    expect: ['Col'],
+    config: {},
+    props: []
   }
 }
 
 export const category = {
   '文本/标题': ['div', 'span', 'p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5'],
   '布局': ['div', 'Grid.Row', 'Grid.Col'],
+  '业务组件': ['MainPanel', 'RemoteTable'],
   '表单': ['Form', 'FormItem', 'Button', 'Input', 'NumberInput', 'TagInput', 'Select', 'Option', 'Radio', 'RadioGroup', 'Checkbox', 'CheckboxGroup', 'Upload', 'Datetime', 'Transfer', 'Editor'],
   '展示': ['Tag', 'Button', 'Table', 'Col'],
   '消息': ['Tooltip', 'Popover'],
   '导航': ['Dropdown', 'Tabs', 'Menu', 'MenuItem', 'SubMenu', 'MenuItemGroup'],
-  '弹窗': ['Modal'],
-  '业务组件': ['主面板', '数据表格']
+  '弹窗': ['Modal']
 }
