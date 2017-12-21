@@ -1,6 +1,3 @@
-/**
- * Created by BG236557 on 2016/7/14.
- */
 import '../assets/style/mainPanel.css'
 import React, { Component } from 'react'
 import { Table } from 'asumi'
@@ -13,8 +10,8 @@ export default class RemoteTable extends Component {
   }
 
   pageChange (page, sizePerPage) {
-    page = page < 1 ? 1 : page;
-    this.props.pageChange(page, (page - 1) * sizePerPage, sizePerPage);
+    page = page < 1 ? 1 : page
+    this.props.pageChange(page, (page - 1) * sizePerPage, sizePerPage)
   }
 
   render () {
@@ -32,8 +29,8 @@ export default class RemoteTable extends Component {
       onArrowClick,
       expandRowKeys,
       handleSelectAll,
-      childrenPropertyName,
-    } = this.props;
+      childrenPropertyName
+    } = this.props
     let options = {
       page: page,
       noDataText: '暂无数据',
@@ -41,14 +38,14 @@ export default class RemoteTable extends Component {
       sizePageList: [10, 30, 50, 100, 200],
       sizePerPageList: [10, 30, 50, 100, 200],
       onPageChange: this.pageChange.bind(this)
-    };
+    }
     let selectRow = {
-      mode: "checkbox",
+      mode: 'checkbox',
       onSelect: handleSelect,
-      onSelectAll: handleSelectAll,
-    };
+      onSelectAll: handleSelectAll
+    }
     if (selected) {
-      selectRow.selected = selected;
+      selectRow.selected = selected
     }
     if (totalSize !== -1) {
       return (
@@ -78,7 +75,7 @@ export default class RemoteTable extends Component {
       options = {
         noDataText: '暂无数据',
         sizePerPageList: [10, 30, 50, 100, 200]
-      };
+      }
       return (
         <div className="pdl20 pdr20">
           <Table
@@ -102,5 +99,5 @@ RemoteTable.defaultProps = {
   search: false,
   totalSize: -1,
   sizePerPage: 10,
-  childrenPropertyName: "children"
-};
+  childrenPropertyName: 'children'
+}

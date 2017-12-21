@@ -1033,7 +1033,7 @@ export default {
       showLoad: false
     },
     config: {
-      form: [],
+      options: [],
       buttons: [],
       data: '%sdata',
       showLoad: '%sshowLoad'
@@ -1048,11 +1048,11 @@ export default {
       placeholder: '%s表示state'
     }],
     mapableProps: {
-      form: {
+      options: {
         displayName: '查询条件',
         config: {
           name: '',
-          text: ''
+          label: ''
         },
         props: [{
           label: '变量名',
@@ -1060,7 +1060,7 @@ export default {
           size: 'small'
         }, {
           label: '名称',
-          name: 'text',
+          name: 'label',
           size: 'small'
         }]
       }

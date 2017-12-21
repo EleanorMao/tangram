@@ -107,9 +107,9 @@ export const BaseModel = {
     key: 'root',
     type: 'MainPanel',
     props: {
-      form: [{
+      options: [{
         name: 'loginNam',
-        text: '用户名'
+        label: '用户名'
       }],
       buttons: [],
       data: '%sdata',
